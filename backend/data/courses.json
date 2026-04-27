@@ -1,0 +1,28 @@
+{
+  "courses": [
+    {
+      "name": "B.Tech",
+      "branches": ["CSE", "IT", "CST"],
+      "semesters": [
+        {
+          "number": 3,
+          "subjects": [
+            {
+              "name": "OOPS",
+              "language": "C++"
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "subjects": [
+            {
+              "name": "Programming in Java",
+              "language": "Java"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

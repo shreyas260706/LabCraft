@@ -7,6 +7,7 @@ import random
 from pydantic import BaseModel, ValidationError
 from google import genai
 from config import Config
+from flask import request
 
 
 # ─── Pydantic Schemas ───────────────────────────────────────────────
@@ -35,35 +36,68 @@ class PPTSchema(BaseModel):
     slides: list[SlideSchema]
 
 
-# ─── Global Cache ───────────────────────────────────────────────────
+# ─── Global State & Cache ───────────────────────────────────────────
 _cache = {}
-
-# ─── Modification Usage Tracking ─────────────────────────────────────
 _modify_usage = {}  # key: subject_topic → count
+_rate_limit_usage = {} # key: ip -> list of timestamps
+_key_index = 0
 
 # ─── Gemini Client ──────────────────────────────────────────────────
 
+def _check_rate_limit():
+    """Limit to 3 requests per minute per IP."""
+    try:
+        ip = request.remote_addr
+    except RuntimeError:
+        # If running outside Flask context (e.g. testing), bypass
+        return
+
+    now = time.time()
+    
+    if ip not in _rate_limit_usage:
+        _rate_limit_usage[ip] = []
+        
+    # filter out timestamps older than 60 seconds
+    _rate_limit_usage[ip] = [ts for ts in _rate_limit_usage[ip] if now - ts < 60]
+    
+    if len(_rate_limit_usage[ip]) >= 3:
+        raise Exception("Too many requests. Please wait a moment.")
+        
+    _rate_limit_usage[ip].append(now)
+
+
 def _get_client():
-    """Get a Gemini client instance using a random API key."""
+    """Get a Gemini client instance using round-robin API key rotation."""
+    global _key_index
     if not Config.GEMINI_KEYS:
         raise ValueError("No Gemini API keys configured.")
-    key = random.choice(Config.GEMINI_KEYS)
+        
+    key = Config.GEMINI_KEYS[_key_index % len(Config.GEMINI_KEYS)]
+    _key_index += 1
+    
+    # Log which key is being used (masked for security)
+    masked = f"{key[:5]}...{key[-3:]}" if len(key) > 8 else "HIDDEN"
+    print(f"[AI Service] Using API Key: {masked}")
+    
     return genai.Client(api_key=key)
 
 
 def _generate_with_retry(prompt: str, schema, max_retries: int = None):
     """
-    Generate structured content with Gemini, with validation and retry on failure.
+    Generate structured content with Gemini, with validation and exponential backoff retry.
     Uses Pydantic schema for strict JSON output.
     """
     if max_retries is None:
         max_retries = Config.MAX_RETRIES
 
+    # Check IP-based rate limit BEFORE attempting any generation
+    _check_rate_limit()
+
     last_error = None
 
     for attempt in range(max_retries):
-        client = _get_client()
         try:
+            client = _get_client()
             response = client.models.generate_content(
                 model=Config.GEMINI_MODEL,
                 contents=prompt,
@@ -86,14 +120,15 @@ def _generate_with_retry(prompt: str, schema, max_retries: int = None):
         except (ValidationError, json.JSONDecodeError, Exception) as e:
             last_error = e
             if attempt < max_retries - 1:
-                # Exponential backoff (handles 429/temporary errors better)
-                sleep_s = min(20, (2 ** attempt) + random.uniform(1, 3))
+                # Exponential backoff: (2 ** attempt) + random jitter (0 to 1)
+                sleep_s = (2 ** attempt) + random.uniform(0, 1)
+                print(f"[AI Service] Attempt {attempt + 1} failed with error: {str(e)[:50]}... Retrying in {sleep_s:.2f}s")
                 time.sleep(sleep_s)
                 continue
 
     if last_error:
-        print(f"[AI Service Error] Generation failed after {max_retries} attempts. Last error: {last_error}")
-    raise Exception("AI servers busy. Please try again in a few seconds.")
+        print(f"[AI Service Error] Generation failed after {max_retries} attempts. Final error: {last_error}")
+    raise Exception("AI servers are busy. Please try again in a few seconds.")
 
 
 # ─── Public API ─────────────────────────────────────────────────────

@@ -91,6 +91,8 @@ def _generate_with_retry(prompt: str, schema, max_retries: int = None):
                 time.sleep(sleep_s)
                 continue
 
+    if last_error:
+        print(f"[AI Service Error] Generation failed after {max_retries} attempts. Last error: {last_error}")
     raise Exception("AI servers busy. Please try again in a few seconds.")
 
 

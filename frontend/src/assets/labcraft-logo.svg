@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="72" viewBox="0 0 320 72" fill="none">
+  <defs>
+    <linearGradient id="iconGrad" x1="4" y1="4" x2="56" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="bracketGrad" x1="14" y1="28" x2="46" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="80" y1="20" x2="310" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C4B5FD"/>
+      <stop offset="50%" stop-color="#E0E7FF"/>
+      <stop offset="100%" stop-color="#A5F3FC"/>
+    </linearGradient>
+    <filter id="iconGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Icon -->
+  <g transform="translate(4, 4)" filter="url(#iconGlow)">
+    <!-- Flask neck -->
+    <path d="M24 2 L24 16 L36 16 L36 2" stroke="url(#iconGrad)" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Flask body - angular geometric -->
+    <path d="M24 16 L8 52 Q6.5 55 9 57 L51 57 Q53.5 55 52 52 L36 16" stroke="url(#iconGrad)" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Left bracket < -->
+    <path d="M26 32 L17 40 L26 48" stroke="url(#bracketGrad)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Right bracket > -->
+    <path d="M34 32 L43 40 L34 48" stroke="url(#bracketGrad)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Slash / -->
+    <path d="M33 30 L27 50" stroke="url(#bracketGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Text: LabCraft -->
+  <text x="80" y="48" font-family="'Space Grotesk', 'Sora', 'Inter', system-ui, sans-serif" font-size="34" font-weight="600" letter-spacing="3" fill="url(#textGrad)">LabCraft</text>
+</svg>

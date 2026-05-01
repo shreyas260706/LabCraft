@@ -1,5 +1,5 @@
 /**
- * HomePage — Course/Semester/Subject selection + Mode selection + Generate
+ * HomePage — Premium hero section + Generator card + History
  */
 import { useState, useEffect } from 'react';
 import { getCourses } from '../services/api';
@@ -117,6 +117,12 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
     });
   };
 
+  // Scroll to generator
+  const scrollToGenerator = () => {
+    const el = document.getElementById('generator-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   // Dependency map: section toggle → enhancement toggle(s) it controls
   const DEPENDENCY_MAP = {
     include_theory: ['detailed_theory'],
@@ -219,21 +225,72 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
 
   return (
     <div className="home-page">
-      {/* Hero */}
-      <div className="hero-section">
-        <div className="hero-badge">✨ Lab Generator</div>
-        <h1 className="hero-title">
-          Generate Lab Files &<br />
-          <span className="gradient-text">Presentations Instantly</span>
-        </h1>
-        <p className="hero-description">
-          Select your course, pick a subject, and let LabCraft create exam-ready
-          lab experiments and presentations. Download as PDF, Word, or PPT.
-        </p>
-      </div>
+      {/* ─── Hero Section ──────────────────────────────────── */}
+      <section className="hero-section" id="hero">
+        <div className="hero-grid-bg"></div>
 
-      {/* Steps Bar */}
-      <div className="steps-bar">
+        <div className="hero-badge">
+          <span className="hero-badge-dot"></span>
+          AI-Powered Lab Generator
+        </div>
+
+        <h1 className="hero-title">
+          Your Lab Files,{' '}
+          <br />
+          <span className="hero-title-gradient">Crafted by AI</span>
+        </h1>
+
+        <p className="hero-description">
+          Generate exam-ready lab experiments, source code, and presentations
+          in seconds. Just pick your subject and topic — LabCraft does the rest.
+        </p>
+
+        <div className="hero-cta-row">
+          <button className="btn btn-primary btn-lg hero-cta-primary" onClick={scrollToGenerator}>
+            Start Generating
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+          <button className="btn btn-outline-glow btn-lg" onClick={scrollToGenerator}>
+            See How It Works
+          </button>
+        </div>
+
+        {/* Feature Pills */}
+        <div className="hero-features">
+          <div className="hero-feature-pill">
+            <span>⚡</span> Instant Generation
+          </div>
+          <div className="hero-feature-pill">
+            <span>📄</span> PDF & DOCX Export
+          </div>
+          <div className="hero-feature-pill">
+            <span>🎯</span> Exam-Ready Format
+          </div>
+        </div>
+
+        {/* Stats Bar */}
+        <div className="hero-stats">
+          <div className="hero-stat">
+            <span className="hero-stat-number">500+</span>
+            <span className="hero-stat-label">Experiments Generated</span>
+          </div>
+          <div className="hero-stat-divider"></div>
+          <div className="hero-stat">
+            <span className="hero-stat-number">50+</span>
+            <span className="hero-stat-label">Subjects Covered</span>
+          </div>
+          <div className="hero-stat-divider"></div>
+          <div className="hero-stat">
+            <span className="hero-stat-number">3</span>
+            <span className="hero-stat-label">Export Formats</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Steps Indicator ────────────────────────────────── */}
+      <div className="steps-bar" id="generator-section">
         <div className="step-item">
           <div className={`step-number ${step >= 1 ? 'completed' : 'active'}`}>1</div>
           <span className="step-label">Select Course</span>
@@ -251,14 +308,14 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
       </div>
 
       {error && (
-        <div className="error-banner" style={{ maxWidth: 680, marginBottom: 24 }}>
+        <div className="error-banner" style={{ maxWidth: 720, marginBottom: 24 }}>
           <span>⚠️</span>
           <span>{error}</span>
           <button onClick={loadCourses}>Retry</button>
         </div>
       )}
 
-      {/* Generator Card */}
+      {/* ─── Generator Card ─────────────────────────────────── */}
       <div className="generator-card glass-card">
         <div className="card-header">
           <div className="card-icon">🧪</div>
@@ -468,6 +525,9 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
                 disabled={!canGenerate}
                 onClick={handleSubmit}
               >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
                 Generate
               </button>
             </div>
@@ -475,11 +535,17 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
         </div>
       </div>
 
-      {/* Recent History */}
+      {/* ─── Recent History ──────────────────────────────────── */}
       {history.length > 0 && (
         <div className="history-section slide-up">
           <div className="history-header">
-            <h3 className="history-title">🕘 Recent Work</h3>
+            <h3 className="history-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Recent Work
+            </h3>
             <button className="btn btn-ghost btn-sm" onClick={onClearHistory}>
               Clear All
             </button>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="ig" x1="8" y1="2" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="16" y1="28" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <filter id="gl">
+      <feGaussianBlur stdDeviation="1.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#gl)">
+    <!-- Flask neck -->
+    <path d="M26 4 L26 16 L38 16 L38 4" stroke="url(#ig)" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Flask body -->
+    <path d="M26 16 L10 50 Q8.5 53 11 55 L53 55 Q55.5 53 54 50 L38 16" stroke="url(#ig)" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Left bracket < -->
+    <path d="M28 30 L19 38 L28 46" stroke="url(#bg)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Right bracket > -->
+    <path d="M36 30 L45 38 L36 46" stroke="url(#bg)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Slash -->
+    <path d="M35 28 L29 48" stroke="url(#bg)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

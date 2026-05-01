@@ -9,13 +9,13 @@
   --primary-light: #8B5CF6;
   --primary-lighter: #A78BFA;
   --primary-dark: #6D28D9;
-  --primary-glow: rgba(124, 58, 237, 0.4);
+  --primary-glow: rgba(124, 58, 237, 0.25);
 
   /* Accent — Neon Blue */
   --accent: #06B6D4;
   --accent-light: #22D3EE;
   --accent-lighter: #67E8F9;
-  --accent-glow: rgba(6, 182, 212, 0.3);
+  --accent-glow: rgba(6, 182, 212, 0.2);
 
   /* Gradient */
   --gradient-primary: linear-gradient(135deg, #7C3AED, #06B6D4);
@@ -31,10 +31,10 @@
   --bg-surface-active: #1F253A;
   --bg-elevated: #1A2035;
 
-  /* Text */
+  /* Text — WCAG contrast optimized */
   --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
-  --text-tertiary: #64748B;
+  --text-secondary: #B0BEC5;
+  --text-tertiary: #78909C;
   --text-inverse: #0B0F1A;
 
   /* Borders */
@@ -48,11 +48,11 @@
   --error: #F87171;
 
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-bg-hover: rgba(255, 255, 255, 0.06);
-  --glass-border-hover: rgba(255, 255, 255, 0.12);
-  --glass-blur: 24px;
+  --glass-bg: rgba(255, 255, 255, 0.025);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-bg-hover: rgba(255, 255, 255, 0.05);
+  --glass-border-hover: rgba(255, 255, 255, 0.1);
+  --glass-blur: 20px;
 
   /* Spacing — 8px scale */
   --space-xs: 4px;
@@ -114,29 +114,16 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient gradient orbs */
+/* Ambient gradient — single subtle layer */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124, 58, 237, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 85% 100%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+    radial-gradient(ellipse 70% 50% at 20% -5%, rgba(124, 58, 237, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 95%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
-  animation: bgDrift 25s ease-in-out infinite alternate;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(circle 600px at 65% 15%, rgba(139, 92, 246, 0.06) 0%, transparent 70%),
-    radial-gradient(circle 500px at 25% 85%, rgba(6, 182, 212, 0.04) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-  animation: bgDrift 30s ease-in-out 5s infinite alternate-reverse;
 }
 
 #root {

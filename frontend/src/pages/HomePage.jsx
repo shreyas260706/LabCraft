@@ -305,6 +305,82 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
         </div>
       </section>
 
+      {/* ─── Tools Section ──────────────────────────────────── */}
+      <section className="tools-section">
+        <div className="tools-header">
+          <span className="tools-badge badge badge-primary">Features</span>
+          <h2 className="tools-heading">
+            Everything You Need,{' '}
+            <span className="gradient-text">In One Place</span>
+          </h2>
+          <p className="tools-subheading">
+            LabCraft handles the heavy lifting — from theory to code to downloads.
+          </p>
+        </div>
+
+        <div className="tools-grid">
+          <div className="tool-card">
+            <div className="tool-icon-wrap tool-icon-purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 3h6v11l-3 3-3-3V3z"/><path d="M6 21h12"/><path d="M6 21l3-3"/><path d="M18 21l-3-3"/>
+              </svg>
+            </div>
+            <h3 className="tool-title">Lab Experiments</h3>
+            <p className="tool-desc">Generate complete lab files with AIM, theory, code, viva, and output — formatted exactly how your university expects.</p>
+          </div>
+
+          <div className="tool-card">
+            <div className="tool-icon-wrap tool-icon-blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>
+              </svg>
+            </div>
+            <h3 className="tool-title">Presentations</h3>
+            <p className="tool-desc">Create structured slide decks on any topic. AI generates headings and bullet points, ready to download as PPTX.</p>
+          </div>
+
+          <div className="tool-card">
+            <div className="tool-icon-wrap tool-icon-green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+              </svg>
+            </div>
+            <h3 className="tool-title">Source Code</h3>
+            <p className="tool-desc">Clean, working source code in any language — with optional explanations and comments for better understanding.</p>
+          </div>
+
+          <div className="tool-card">
+            <div className="tool-icon-wrap tool-icon-orange">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>
+              </svg>
+            </div>
+            <h3 className="tool-title">Viva Questions</h3>
+            <p className="tool-desc">AI-generated Q&A sets to help you prepare for viva voce. Covers key concepts and common examiner questions.</p>
+          </div>
+
+          <div className="tool-card">
+            <div className="tool-icon-wrap tool-icon-pink">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
+            <h3 className="tool-title">Multi-Format Export</h3>
+            <p className="tool-desc">Download your work as PDF, DOCX, or PPTX. Print-ready formatting that looks professional every time.</p>
+          </div>
+
+          <div className="tool-card">
+            <div className="tool-icon-wrap tool-icon-cyan">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </div>
+            <h3 className="tool-title">Section Editing</h3>
+            <p className="tool-desc">Don't like a section? Modify any part individually with custom instructions — AI regenerates just that section.</p>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Steps Indicator ────────────────────────────────── */}
       <div className="steps-bar" id="generator-section">
         <div className="step-item">

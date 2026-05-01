@@ -8,6 +8,7 @@ from pydantic import BaseModel, ValidationError
 from google import genai
 from config import Config
 from flask import request
+from threading import Lock
 
 
 # ─── Pydantic Schemas ───────────────────────────────────────────────
@@ -38,9 +39,46 @@ class PPTSchema(BaseModel):
 
 # ─── Global State & Cache ───────────────────────────────────────────
 _cache = {}
+_CACHE_TTL = 3600  # 1 hour
+_MAX_CACHE_SIZE = 200
+_cache_lock = Lock()
+
 _modify_usage = {}  # key: subject_topic → count
 _rate_limit_usage = {} # key: ip -> list of timestamps
 _key_index = 0
+
+# ─── Cache Helpers ──────────────────────────────────────────────────
+
+def _make_key(subject: str, topic: str, prefix: str = "", options: dict = None) -> str:
+    norm_subject = (subject or "").strip().lower()
+    norm_topic = (topic or "").strip().lower()
+    base = f"{prefix}_{norm_subject}_{norm_topic}" if prefix else f"{norm_subject}_{norm_topic}"
+    if options:
+        active_opts = sorted([k for k, v in options.items() if v])
+        if active_opts:
+            base += "_" + "_".join(active_opts)
+        else:
+            base += "_default"
+    return base
+
+def _cache_get(key: str):
+    with _cache_lock:
+        entry = _cache.get(key)
+        if entry and (time.time() - entry["timestamp"]) < _CACHE_TTL:
+            print(f"[AI Service] CACHE HIT: {key}")
+            return entry["data"]
+    print(f"[AI Service] CACHE MISS: {key}")
+    return None
+
+def _cache_set(key: str, data: dict):
+    with _cache_lock:
+        _cache[key] = {
+            "data": json.loads(json.dumps(data)),
+            "timestamp": time.time()
+        }
+        if len(_cache) > _MAX_CACHE_SIZE:
+            oldest_key = min(_cache.keys(), key=lambda k: _cache[k]["timestamp"])
+            del _cache[oldest_key]
 
 # ─── Gemini Client ──────────────────────────────────────────────────
 
@@ -142,13 +180,7 @@ def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str =
     if options is None:
         options = {}
 
-    norm_subject = (subject or "").strip().lower()
-    norm_topic = (topic or "").strip().lower()
-
-    # Include active options in cache key so different combos get separate caches
-    active_opts = sorted([k for k, v in options.items() if v])
-    opts_suffix = "_".join(active_opts) if active_opts else "default"
-    cache_key = f"{norm_subject}_{norm_topic}_{opts_suffix}"
+    cache_key = _make_key(subject, topic, options=options)
 
     # Clean and standardize AIM (prevent duplicates like "implement implement")
     if aim:
@@ -175,9 +207,9 @@ def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str =
     else:
         final_aim = f"To study and implement {topic}."
 
-    if cache_key in _cache:
-        # Cache HIT
-        data = json.loads(json.dumps(_cache[cache_key]))  # deep copy
+    cached_data = _cache_get(cache_key)
+    if cached_data:
+        data = json.loads(json.dumps(cached_data))
         data["experiment_no"] = experiment_no
         data["aim"] = final_aim
         data["subject"] = subject
@@ -306,12 +338,12 @@ STRICT RULES:
         data["output"] = "(Not included)"
     
     # Store ONLY allowed fields in cache
-    _cache[cache_key] = {
+    _cache_set(cache_key, {
         "theory": data["theory"],
         "source_code": data["source_code"],
         "viva": data["viva"],
         "output": data["output"]
-    }
+    })
 
     # Inject metadata
     data["experiment_no"] = experiment_no
@@ -328,9 +360,7 @@ def modify_section(experiment: dict, section: str, instruction: str) -> dict:
     subject = experiment.get("subject")
     topic = experiment.get("topic")
     if subject and topic:
-        norm_subject = (subject or "").strip().lower()
-        norm_topic = _normalize_topic(topic)
-        usage_key = f"{norm_subject}_{norm_topic}"
+        usage_key = _make_key(subject, topic)
 
         if usage_key not in _modify_usage:
             _modify_usage[usage_key] = 0
@@ -392,11 +422,13 @@ Generate ONLY the modified {section} section. Follow these rules:
     subject = experiment.get("subject")
     topic = experiment.get("topic")
     if subject and topic:
-        norm_subject = (subject or "").strip().lower()
-        norm_topic = (topic or "").strip().lower()
-        cache_key = f"{norm_subject}_{norm_topic}"
-        if cache_key in _cache and section in ["theory", "source_code", "viva", "output"]:
-            _cache[cache_key][section] = modified_content
+        cache_key = _make_key(subject, topic)
+        
+        # We only update cache if the base entry exists, to preserve other options
+        cached_data = _cache_get(cache_key)
+        if cached_data and section in ["theory", "source_code", "viva", "output"]:
+            cached_data[section] = modified_content
+            _cache_set(cache_key, cached_data)
             
     return modified_content
 
@@ -404,12 +436,11 @@ Generate ONLY the modified {section} section. Follow these rules:
 def generate_ppt_content(subject: str, topic: str) -> dict:
     """Generate structured PPT slide content."""
 
-    norm_subject = (subject or "").strip().lower()
-    norm_topic = (topic or "").strip().lower()
-    ppt_cache_key = f"ppt_{norm_subject}_{norm_topic}"
+    ppt_cache_key = _make_key(subject, topic, prefix="ppt")
 
-    if ppt_cache_key in _cache:
-        data = json.loads(json.dumps(_cache[ppt_cache_key]))
+    cached_data = _cache_get(ppt_cache_key)
+    if cached_data:
+        data = json.loads(json.dumps(cached_data))
         data["_cached"] = True
         return data
 
@@ -436,7 +467,7 @@ Do NOT add unnecessary filler content."""
     result = _generate_with_retry(prompt, PPTSchema)
     data = result.model_dump()
 
-    _cache[ppt_cache_key] = json.loads(json.dumps(data))
+    _cache_set(ppt_cache_key, data)
     data["_cached"] = False
     return data
 
@@ -445,16 +476,11 @@ def is_experiment_cached(subject: str, topic: str, options: dict = None) -> bool
     """Check if an experiment result is already cached (no API call needed)."""
     if options is None:
         options = {}
-    norm_subject = (subject or "").strip().lower()
-    norm_topic = (topic or "").strip().lower()
-    active_opts = sorted([k for k, v in options.items() if v])
-    opts_suffix = "_".join(active_opts) if active_opts else "default"
-    cache_key = f"{norm_subject}_{norm_topic}_{opts_suffix}"
-    return cache_key in _cache
+    cache_key = _make_key(subject, topic, options=options)
+    return _cache_get(cache_key) is not None
 
 
 def is_ppt_cached(subject: str, topic: str) -> bool:
     """Check if a PPT result is already cached."""
-    norm_subject = (subject or "").strip().lower()
-    norm_topic = (topic or "").strip().lower()
-    return f"ppt_{norm_subject}_{norm_topic}" in _cache
+    ppt_cache_key = _make_key(subject, topic, prefix="ppt")
+    return _cache_get(ppt_cache_key) is not None

@@ -228,31 +228,45 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
       {/* ─── Hero Section ──────────────────────────────────── */}
       <section className="hero-section" id="hero">
         <div className="hero-grid-bg"></div>
+        {/* Floating glow orbs */}
+        <div className="hero-glow hero-glow-purple"></div>
+        <div className="hero-glow hero-glow-blue"></div>
+        <div className="hero-glow hero-glow-center"></div>
 
         <div className="hero-badge">
           <span className="hero-badge-dot"></span>
-          AI-Powered Lab Generator
+          <span>Powered by Gemini AI</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{opacity: 0.5}}>
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
         </div>
 
         <h1 className="hero-title">
-          Your Lab Files,{' '}
+          All Study Tools.
           <br />
-          <span className="hero-title-gradient">Crafted by AI</span>
+          <span className="hero-title-gradient">One Platform.</span>
         </h1>
 
         <p className="hero-description">
-          Generate exam-ready lab experiments, source code, and presentations
-          in seconds. Just pick your subject and topic — LabCraft does the rest.
+          Lab experiments, source code, presentations — generated in seconds.
+          <br />
+          Pick your subject. Get exam-ready output. Download instantly.
         </p>
 
         <div className="hero-cta-row">
           <button className="btn btn-primary btn-lg hero-cta-primary" onClick={scrollToGenerator}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
             Start Generating
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </button>
-          <button className="btn btn-outline-glow btn-lg" onClick={scrollToGenerator}>
+          <button className="btn btn-outline-glow btn-lg hero-cta-secondary" onClick={scrollToGenerator}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+            </svg>
             See How It Works
           </button>
         </div>
@@ -260,31 +274,33 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
         {/* Feature Pills */}
         <div className="hero-features">
           <div className="hero-feature-pill">
-            <span>⚡</span> Instant Generation
+            <span className="hero-pill-icon">⚡</span>
+            <span>Instant Generation</span>
           </div>
           <div className="hero-feature-pill">
-            <span>📄</span> PDF & DOCX Export
+            <span className="hero-pill-icon">📄</span>
+            <span>PDF & DOCX Export</span>
           </div>
           <div className="hero-feature-pill">
-            <span>🎯</span> Exam-Ready Format
+            <span className="hero-pill-icon">🎯</span>
+            <span>Exam-Ready Format</span>
+          </div>
+          <div className="hero-feature-pill">
+            <span className="hero-pill-icon">🔁</span>
+            <span>AI Regeneration</span>
           </div>
         </div>
 
-        {/* Stats Bar */}
-        <div className="hero-stats">
-          <div className="hero-stat">
-            <span className="hero-stat-number">500+</span>
-            <span className="hero-stat-label">Experiments Generated</span>
+        {/* Trust indicators */}
+        <div className="hero-trust">
+          <div className="hero-trust-avatars">
+            <div className="hero-avatar" style={{background: 'linear-gradient(135deg, #7C3AED, #06B6D4)'}}>S</div>
+            <div className="hero-avatar" style={{background: 'linear-gradient(135deg, #06B6D4, #34D399)'}}>A</div>
+            <div className="hero-avatar" style={{background: 'linear-gradient(135deg, #8B5CF6, #EC4899)'}}>R</div>
+            <div className="hero-avatar" style={{background: 'linear-gradient(135deg, #F59E0B, #EF4444)'}}>M</div>
           </div>
-          <div className="hero-stat-divider"></div>
-          <div className="hero-stat">
-            <span className="hero-stat-number">50+</span>
-            <span className="hero-stat-label">Subjects Covered</span>
-          </div>
-          <div className="hero-stat-divider"></div>
-          <div className="hero-stat">
-            <span className="hero-stat-number">3</span>
-            <span className="hero-stat-label">Export Formats</span>
+          <div className="hero-trust-text">
+            <span className="hero-trust-highlight">500+ students</span> already generating lab files
           </div>
         </div>
       </section>

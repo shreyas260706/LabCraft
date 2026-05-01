@@ -381,6 +381,55 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
         </div>
       </section>
 
+      {/* ─── Benefits Section ───────────────────────────────── */}
+      <section className="benefits-section">
+        <div className="benefits-header">
+          <span className="benefits-badge badge badge-accent">Why LabCraft?</span>
+          <h2 className="benefits-heading">
+            Built for Students Who{' '}
+            <span className="gradient-text">Value Their Time</span>
+          </h2>
+        </div>
+
+        <div className="benefits-grid">
+          <div className="benefit-card">
+            <div className="benefit-number">01</div>
+            <div className="benefit-content">
+              <h3 className="benefit-title">Save Hours, Not Minutes</h3>
+              <p className="benefit-desc">Stop spending 2–3 hours formatting lab files manually. LabCraft generates a complete, submission-ready experiment in under 30 seconds.</p>
+            </div>
+            <div className="benefit-accent benefit-accent-purple"></div>
+          </div>
+
+          <div className="benefit-card">
+            <div className="benefit-number">02</div>
+            <div className="benefit-content">
+              <h3 className="benefit-title">University-Grade Quality</h3>
+              <p className="benefit-desc">Output follows the exact format your university expects — structured AIM, theory, code with comments, and properly numbered viva questions.</p>
+            </div>
+            <div className="benefit-accent benefit-accent-blue"></div>
+          </div>
+
+          <div className="benefit-card">
+            <div className="benefit-number">03</div>
+            <div className="benefit-content">
+              <h3 className="benefit-title">AI That Understands Context</h3>
+              <p className="benefit-desc">Powered by Gemini AI, LabCraft understands your subject matter deeply — generating accurate theory, working code, and relevant viva answers.</p>
+            </div>
+            <div className="benefit-accent benefit-accent-green"></div>
+          </div>
+
+          <div className="benefit-card">
+            <div className="benefit-number">04</div>
+            <div className="benefit-content">
+              <h3 className="benefit-title">Iterate Until Perfect</h3>
+              <p className="benefit-desc">Not happy with a section? Modify any part individually with plain English instructions. Regenerate only what you need — keep the rest intact.</p>
+            </div>
+            <div className="benefit-accent benefit-accent-cyan"></div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Steps Indicator ────────────────────────────────── */}
       <div className="steps-bar" id="generator-section">
         <div className="step-item">

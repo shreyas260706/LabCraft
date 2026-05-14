@@ -3,6 +3,7 @@ import './App.css';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import ResultPage from './pages/ResultPage';
+import { preWarmBackend } from './services/api';
 
 const HISTORY_KEY = 'labcraft_history';
 const MAX_HISTORY = 10;
@@ -14,8 +15,10 @@ function App() {
   const [pptData, setPptData] = useState(null);
   const [history, setHistory] = useState([]);
 
-  // Load history from localStorage on mount
+  // Pre-warm backend + load history on mount
   useEffect(() => {
+    // Wake up Render backend silently (fire-and-forget)
+    preWarmBackend();
     try {
       const stored = localStorage.getItem(HISTORY_KEY);
       if (stored) setHistory(JSON.parse(stored));

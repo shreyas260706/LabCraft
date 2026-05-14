@@ -1,14 +1,17 @@
 /**
  * ResultPage — Displays generated experiment or PPT with section editing and downloads
+ * Includes premium loading experience, local cache, timeout/retry UX, and polished display
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   generateExperiment,
   generatePPT,
   modifySection,
   downloadExperiment,
   downloadPPT,
+  localCache,
 } from '../services/api';
+import GenerationLoadingView from '../components/GenerationLoadingView';
 
 // ─── Section config ──────────────────────────────────────
 const SECTIONS = [
@@ -19,6 +22,10 @@ const SECTIONS = [
   { key: 'output', title: 'OUTPUT', icon: '📤', placeholder: 'e.g. Show more test cases' },
 ];
 
+// Timeout thresholds
+const SLOW_THRESHOLD_MS = 30000;  // 30s — show "taking longer" warning
+const RETRY_THRESHOLD_MS = 90000; // 90s — show retry button
+
 function ResultPage({ config, experimentData, setExperimentData, pptData, setPptData, onBack, onSaveHistory }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -28,40 +35,103 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
   const [downloading, setDownloading] = useState(null);
   const [toast, setToast] = useState(null);
 
+  // Loading UX state
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [isSlow, setIsSlow] = useState(false);
+  const [showRetry, setShowRetry] = useState(false);
+  const timerRef = useRef(null);
+  const abortRef = useRef(null);
+
   const isExperiment = config.mode === 'experiment';
 
-  // Generate on mount
+  // Generate on mount (with local cache check)
   useEffect(() => {
     if (isExperiment && !experimentData) {
-      handleGenerate();
+      // Check local cache first
+      const cached = localCache.get(config.subject, config.topic, config.options || {});
+      if (cached) {
+        // Instantly show cached content
+        const cacheResult = {
+          ...cached,
+          experiment_no: config.experimentNo,
+          subject: config.subject,
+          topic: config.topic,
+        };
+        setExperimentData(cacheResult);
+        onSaveHistory?.(config, cacheResult);
+        // Silently refresh in background
+        handleGenerate(true);
+      } else {
+        handleGenerate();
+      }
     } else if (!isExperiment && !pptData) {
-      handleGenerate();
+      const cached = localCache.getPPT(config.subject, config.topic);
+      if (cached) {
+        setPptData(cached);
+        onSaveHistory?.(config, cached);
+        handleGenerate(true);
+      } else {
+        handleGenerate();
+      }
     }
   }, []);
+
+  // Elapsed timer
+  useEffect(() => {
+    if (loading) {
+      setElapsedMs(0);
+      setIsSlow(false);
+      setShowRetry(false);
+      timerRef.current = setInterval(() => {
+        setElapsedMs(prev => {
+          const next = prev + 200;
+          if (next >= SLOW_THRESHOLD_MS) setIsSlow(true);
+          if (next >= RETRY_THRESHOLD_MS) setShowRetry(true);
+          return next;
+        });
+      }, 200);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setElapsedMs(0);
+      setIsSlow(false);
+      setShowRetry(false);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [loading]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleGenerate = async () => {
-    setLoading(true);
-    setError(null);
+  const handleGenerate = async (isBackgroundRefresh = false) => {
+    if (!isBackgroundRefresh) {
+      setLoading(true);
+      setError(null);
+    }
+
     try {
       if (isExperiment) {
         const data = await generateExperiment(config.subject, config.experimentNo, config.topic, config.options || {});
         setExperimentData(data);
-        onSaveHistory?.(config, data);
+        // Save to local cache
+        localCache.set(config.subject, config.topic, config.options || {}, data);
+        if (!isBackgroundRefresh) onSaveHistory?.(config, data);
       } else {
         const data = await generatePPT(config.subject, config.topic, config.options || {});
         setPptData(data);
-        onSaveHistory?.(config, data);
+        localCache.setPPT(config.subject, config.topic, data);
+        if (!isBackgroundRefresh) onSaveHistory?.(config, data);
       }
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || 'Generation failed';
-      setError(msg);
+      if (!isBackgroundRefresh) {
+        const msg = err.response?.data?.error || err.message || 'Generation failed';
+        setError(msg);
+      }
     } finally {
-      setLoading(false);
+      if (!isBackgroundRefresh) setLoading(false);
     }
   };
 
@@ -114,6 +184,12 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
       if (lines.length && lines[lines.length - 1].trim() === '```') lines.pop();
       c = lines.join('\n');
     }
+    
+    // Detect if code is received as a single long line and reformat
+    if (!c.includes('\n') && (c.includes(';') || c.includes('{'))) {
+      c = c.replaceAll(';', ';\n').replaceAll('{', '{\n').replaceAll('}', '\n}');
+    }
+    
     return c;
   };
 
@@ -132,18 +208,31 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
   };
 
   // ─── Loading State ──────────────────────────────────────
-  if (loading) {
+  if (loading && !experimentData && !pptData) {
     return (
       <div className="result-page">
-        <div className="loading-overlay">
-          <div className="spinner"></div>
-          <div className="loading-text">
-            {isExperiment ? '🧪 Generating Experiment...' : '📊 Generating Presentation...'}
-          </div>
-          <div className="loading-subtext">
-            This may take 10-20 seconds. Crafting your content.
+        <div className="result-header" style={{ maxWidth: 900, margin: '0 auto' }}>
+          <button className="back-button" onClick={onBack}>← Back to Home</button>
+          <div className="result-meta">
+            <h2>{isExperiment ? `Experiment ${config.experimentNo}` : config.topic}</h2>
+            <p>{config.subject} • {config.course}</p>
           </div>
         </div>
+
+        <GenerationLoadingView
+          isExperiment={isExperiment}
+          elapsedMs={elapsedMs}
+          isSlow={isSlow}
+        />
+
+        {showRetry && (
+          <div className="gen-retry-bar">
+            <span>This is taking longer than expected.</span>
+            <button className="btn btn-ghost btn-sm" onClick={() => handleGenerate()}>
+              Retry
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -155,10 +244,22 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
         <div className="result-header" style={{ maxWidth: 900, margin: '0 auto' }}>
           <button className="back-button" onClick={onBack}>← Back</button>
         </div>
-        <div className="error-banner" style={{ maxWidth: 900, margin: '0 auto' }}>
-          <span>⚠️</span>
-          <span>{error}</span>
-          <button onClick={handleGenerate}>Retry</button>
+        <div className="error-state-card">
+          <div className="error-state-icon">⚠️</div>
+          <h3 className="error-state-title">Generation Failed</h3>
+          <p className="error-state-message">{error}</p>
+          <div className="error-state-actions">
+            <button className="btn btn-primary btn-sm" onClick={() => handleGenerate()}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              Try Again
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={onBack}>
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -219,28 +320,32 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
                   {sec.key === 'source_code' ? (
                     <div className="code-block">
                       <span className="code-lang-badge">{detectLang(experimentData.source_code)}</span>
-                      <pre>{formatCode(experimentData.source_code)}</pre>
+                      <pre><code>{formatCode(experimentData.source_code)}</code></pre>
                     </div>
                   ) : sec.key === 'viva' ? (
                     <div className="viva-list">
                       {(experimentData.viva || []).map((qa, i) => (
-                        <div key={i} className="viva-item" style={{ marginBottom: '16px' }}>
-                          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#e0e0e0' }}>
-                            Q{i + 1}: {qa.question}
+                        <div key={i} className="viva-item">
+                          <div className="viva-question">
+                            <span className="viva-q-num">Q{i + 1}</span>
+                            <span>{qa.question}</span>
                           </div>
-                          <div style={{ color: '#a0a0a0' }}>
-                            A: {qa.answer}
+                          <div className="viva-answer">
+                            <span className="viva-a-label">A:</span>
+                            <span>{qa.answer}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : sec.key === 'output' ? (
-                    <div className="code-block">
+                    <div className="code-block output-block">
                       <span className="code-lang-badge">Output</span>
                       <pre>{experimentData.output}</pre>
                     </div>
                   ) : (
-                    <div className="section-text">{experimentData[sec.key]}</div>
+                    <div className="section-text">
+                      {experimentData[sec.key]}
+                    </div>
                   )}
                 </div>
               )}
@@ -287,7 +392,7 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
           </button>
           <button
             className="btn btn-ghost btn-sm"
-            onClick={handleGenerate}
+            onClick={() => handleGenerate()}
             disabled={loading}
           >
             Regenerate
@@ -340,7 +445,7 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
           </button>
           <button
             className="btn btn-ghost btn-sm"
-            onClick={handleGenerate}
+            onClick={() => handleGenerate()}
             disabled={loading}
           >
             Regenerate

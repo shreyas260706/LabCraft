@@ -3,11 +3,12 @@ PDF Generator — Professional lab experiment PDFs using ReportLab.
 
 Key design principles:
   • Section integrity: KeepTogether prevents awkward mid-section page breaks.
-  • Splittable code: Large code blocks split cleanly at line boundaries with
-    a "continued" header on the next page.
+  • Smart code placement: heading + code are grouped — only splits if code
+    exceeds a full page height.  Minimum 8 lines before allowing a split.
   • Page furniture: Header (experiment title) and footer (page numbers) on
     every page via onPage callbacks.
   • Typography hierarchy: Title → Section Heading → Body → Bullet → Code.
+  • Generous spacing: readable theory bullets, viva Q&A, and section gaps.
 """
 import io
 import re
@@ -16,7 +17,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
     HRFlowable, Flowable, KeepTogether
@@ -137,7 +138,15 @@ class SplittableCodeBlock(Flowable):
     A code block that renders with a background fill and left accent border.
     Implements split() so ReportLab can break it across pages at line
     boundaries, inserting a continuation header on the new page.
+
+    Split policy:
+      - At least MIN_LINES_BEFORE_SPLIT lines must fit to allow a split.
+      - At least MIN_LINES_REMAINDER lines must remain for the second part.
+      - If either condition fails, the block is pushed whole to the next page.
     """
+
+    MIN_LINES_BEFORE_SPLIT = 8
+    MIN_LINES_REMAINDER = 4
 
     def __init__(self, code_text, max_width, title="SOURCE CODE",
                  font_name="Courier", font_size=8.5, leading=11.5,
@@ -156,7 +165,7 @@ class SplittableCodeBlock(Flowable):
         self.is_continuation = is_continuation
         self._lines = code_text.split("\n")
         # Continuation header adds a small label at the top
-        self._header_height = 16 if is_continuation else 0
+        self._header_height = 18 if is_continuation else 0
 
     def wrap(self, availWidth, availHeight):
         self.width = min(availWidth, self.max_width)
@@ -167,23 +176,36 @@ class SplittableCodeBlock(Flowable):
         )
         return (self.width, self.height)
 
+    def _get_bg_hex(self):
+        return self.bg_color.hexval() if hasattr(self.bg_color, 'hexval') else "#f4f4f8"
+
+    def _get_border_hex(self):
+        return self.border_color.hexval() if hasattr(self.border_color, 'hexval') else "#6c63ff"
+
     def split(self, availWidth, availHeight):
         """
         Split the code block at a line boundary.
         Returns [first_part, second_part] or [] if unsplittable.
         """
-        # Minimum: at least 3 lines must fit to bother splitting
-        min_height = self.padding * 2 + self._header_height + self.leading * 3
-        if availHeight < min_height:
+        total_lines = len(self._lines)
+
+        # How many lines can physically fit?
+        usable = availHeight - self.padding * 2 - self._header_height
+        lines_that_fit = max(0, int(usable / self.leading))
+
+        # If everything fits, no split needed
+        if lines_that_fit >= total_lines:
+            return [self]
+
+        remaining_lines = total_lines - lines_that_fit
+
+        # Enforce minimum thresholds — refuse to split if the result
+        # would leave an awkwardly small chunk on either side
+        if lines_that_fit < self.MIN_LINES_BEFORE_SPLIT:
             return []  # push entire block to next page
 
-        # How many lines fit in the available space?
-        usable = availHeight - self.padding * 2 - self._header_height
-        lines_that_fit = max(1, int(usable / self.leading))
-        lines_that_fit = min(lines_that_fit, len(self._lines))
-
-        if lines_that_fit >= len(self._lines):
-            return [self]  # everything fits, don't split
+        if remaining_lines < self.MIN_LINES_REMAINDER:
+            return []  # push entire block to next page
 
         first_text = "\n".join(self._lines[:lines_that_fit])
         rest_text = "\n".join(self._lines[lines_that_fit:])
@@ -192,17 +214,15 @@ class SplittableCodeBlock(Flowable):
             first_text, self.max_width, title=self.title,
             font_name=self.font_name, font_size=self.font_size,
             leading=self.leading, padding=self.padding,
-            bg_color=self.bg_color.hexval() if hasattr(self.bg_color, 'hexval') else "#f4f4f8",
-            border_color=self.border_color.hexval() if hasattr(self.border_color, 'hexval') else "#6c63ff",
+            bg_color=self._get_bg_hex(), border_color=self._get_border_hex(),
             is_continuation=self.is_continuation,
         )
         second = SplittableCodeBlock(
             rest_text, self.max_width, title=self.title,
             font_name=self.font_name, font_size=self.font_size,
             leading=self.leading, padding=self.padding,
-            bg_color=self.bg_color.hexval() if hasattr(self.bg_color, 'hexval') else "#f4f4f8",
-            border_color=self.border_color.hexval() if hasattr(self.border_color, 'hexval') else "#6c63ff",
-            is_continuation=True,  # mark second part as continuation
+            bg_color=self._get_bg_hex(), border_color=self._get_border_hex(),
+            is_continuation=True,
         )
         return [first, second]
 
@@ -225,7 +245,7 @@ class SplittableCodeBlock(Flowable):
         if self.is_continuation:
             canvas.setFont("Helvetica-Oblique", 7.5)
             canvas.setFillColor(colors.HexColor("#6c63ff"))
-            canvas.drawString(p + 6, h - 12, f"{self.title} (continued)")
+            canvas.drawString(p + 6, h - 13, f"{self.title} (continued)")
             text_start_y -= self._header_height
 
         # Code text
@@ -323,7 +343,7 @@ def _build_styles():
         parent=styles["Heading2"],
         fontSize=13,
         textColor=colors.HexColor("#16213e"),
-        spaceBefore=14,
+        spaceBefore=18,
         spaceAfter=4,
         fontName="Helvetica-Bold",
         borderWidth=0,
@@ -335,24 +355,25 @@ def _build_styles():
         name="BodyText2",
         parent=styles["BodyText"],
         fontSize=11,
-        leading=16,
+        leading=17,
         alignment=TA_JUSTIFY,
         fontName="Helvetica",
         textColor=colors.HexColor("#2d2d2d"),
-        spaceAfter=4,
+        spaceAfter=6,
     ))
 
     styles.add(ParagraphStyle(
         name="BulletPoint",
         parent=styles["BodyText"],
         fontSize=10.5,
-        leading=15,
+        leading=16,
         alignment=TA_LEFT,
         fontName="Helvetica",
         textColor=colors.HexColor("#2d2d2d"),
-        leftIndent=16,
-        spaceAfter=3,
-        bulletIndent=4,
+        leftIndent=20,
+        spaceBefore=2,
+        spaceAfter=6,
+        bulletIndent=6,
     ))
 
     styles.add(ParagraphStyle(
@@ -362,6 +383,7 @@ def _build_styles():
         leading=15,
         fontName="Helvetica-Bold",
         textColor=colors.HexColor("#1a1a2e"),
+        spaceBefore=4,
         spaceAfter=2,
     ))
 
@@ -372,8 +394,8 @@ def _build_styles():
         leading=15,
         fontName="Helvetica",
         textColor=colors.HexColor("#374151"),
-        leftIndent=8,
-        spaceAfter=8,
+        leftIndent=12,
+        spaceAfter=10,
     ))
 
     styles.add(ParagraphStyle(
@@ -394,40 +416,58 @@ def _build_styles():
 # ════════════════════════════════════════════════════════════════════
 
 def _build_theory_section(theory_raw: str, styles, content_width: float):
-    """Parse theory into definition paragraphs + numbered/bullet points."""
-    flowables = [
+    """
+    Parse theory into definition paragraphs + numbered/bullet points.
+
+    Adds generous spacing between bullet points and after definition
+    paragraphs to avoid the "compressed wall of text" feel.
+    """
+    heading = [
         Paragraph("THEORY", styles["SectionHead"]),
         SectionAccentLine(content_width),
-        Spacer(1, 4),
+        Spacer(1, 6),
     ]
 
+    body = []
     lines = [line.strip() for line in theory_raw.split("\n") if line.strip()]
 
     for line in lines:
         is_bullet = (
-            re.match(r'^\d+[.\)]\s', line) or
+            re.match(r'^\d+[.)]\s', line) or
             line.startswith("• ") or
             line.startswith("- ") or
             line.startswith("* ")
         )
         if is_bullet:
-            flowables.append(Paragraph(line, styles["BulletPoint"]))
+            body.append(Paragraph(line, styles["BulletPoint"]))
         else:
-            flowables.append(Paragraph(line, styles["BodyText2"]))
+            body.append(Paragraph(line, styles["BodyText2"]))
 
-    flowables.append(Spacer(1, 6))
-    return flowables
+    body.append(Spacer(1, 8))
+
+    # Wrap heading + body in KeepTogether.
+    # If theory is longer than a page, ReportLab falls through gracefully
+    # because Paragraphs are natively splittable.
+    return [KeepTogether(heading + body)]
 
 
 def _build_code_section(code_raw: str, content_width: float):
-    """Build the SOURCE CODE section with a splittable code block."""
+    """
+    Build the SOURCE CODE section.
+
+    The heading and code block are wrapped together in KeepTogether so that:
+      - For small/medium code: heading + code move together to the next page
+        rather than splitting the heading from the code.
+      - For large code (> 1 page): KeepTogether's fallthrough lets the
+        SplittableCodeBlock.split() handle the break at line boundaries.
+    """
     styles = _build_styles()
     code = _preprocess_code(code_raw)
 
     heading_flowables = [
         Paragraph("SOURCE CODE", styles["SectionHead"]),
         SectionAccentLine(content_width),
-        Spacer(1, 6),
+        Spacer(1, 8),
     ]
 
     code_block = SplittableCodeBlock(
@@ -436,19 +476,21 @@ def _build_code_section(code_raw: str, content_width: float):
         bg_color="#f4f4f8", border_color="#6c63ff",
     )
 
-    # Try to keep heading + code together.
-    # KeepTogether will push both to the next page if they don't fit.
-    # If the code block is taller than a full page, ReportLab will
-    # fall through to split() on the SplittableCodeBlock automatically.
-    return [KeepTogether(heading_flowables), code_block, Spacer(1, 8)]
+    # GROUP heading + code inside KeepTogether
+    return [KeepTogether(heading_flowables + [code_block]), Spacer(1, 10)]
 
 
 def _build_viva_section(viva_list: list, styles, content_width: float):
-    """Build VIVA VOCE section — each Q&A pair kept together."""
-    section_flowables = [
+    """
+    Build VIVA VOCE section.
+
+    Each Q&A pair is kept together. The section heading is grouped with
+    the first Q&A pair to prevent orphan headings.
+    """
+    heading = [
         Paragraph("VIVA VOCE", styles["SectionHead"]),
         SectionAccentLine(content_width),
-        Spacer(1, 4),
+        Spacer(1, 6),
     ]
 
     qa_groups = []
@@ -461,11 +503,21 @@ def _build_viva_section(viva_list: list, styles, content_width: float):
         ])
         qa_groups.append(pair)
 
-    return section_flowables + qa_groups + [Spacer(1, 6)]
+    # Keep heading attached to the first Q&A pair
+    if qa_groups:
+        first_group = KeepTogether(heading + [qa_groups[0]])
+        return [first_group] + qa_groups[1:] + [Spacer(1, 8)]
+    else:
+        return [KeepTogether(heading)] + [Spacer(1, 8)]
 
 
 def _build_output_section(output_raw: str, content_width: float):
-    """Build OUTPUT section with a splittable code block."""
+    """
+    Build OUTPUT section.
+
+    Heading + output block are grouped in KeepTogether to prevent
+    heading/content separation.
+    """
     styles = _build_styles()
     output = _strip_code_fences(output_raw)
     output = _wrap_long_lines(output, max_chars=78)
@@ -473,7 +525,7 @@ def _build_output_section(output_raw: str, content_width: float):
     heading_flowables = [
         Paragraph("OUTPUT", styles["SectionHead"]),
         SectionAccentLine(content_width),
-        Spacer(1, 6),
+        Spacer(1, 8),
     ]
 
     output_block = SplittableCodeBlock(
@@ -482,7 +534,8 @@ def _build_output_section(output_raw: str, content_width: float):
         bg_color="#f4f4f8", border_color="#10b981",
     )
 
-    return [KeepTogether(heading_flowables), output_block]
+    # GROUP heading + output block together
+    return [KeepTogether(heading_flowables + [output_block])]
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -525,7 +578,7 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
     title_block.append(HRFlowable(
         width="100%", thickness=2,
         color=colors.HexColor("#0f3460"),
-        spaceBefore=6, spaceAfter=10,
+        spaceBefore=6, spaceAfter=12,
     ))
     elements.append(KeepTogether(title_block))
 
@@ -536,17 +589,14 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
         SectionAccentLine(content_width),
         Spacer(1, 4),
         Paragraph(aim_text, styles["BodyText2"]),
-        Spacer(1, 6),
+        Spacer(1, 8),
     ]
     elements.append(KeepTogether(aim_block))
 
     # ── THEORY ──
     theory_raw = experiment.get("theory", "")
     if theory_raw and theory_raw != "(Not included)":
-        theory_flowables = _build_theory_section(theory_raw, styles, content_width)
-        # Try KeepTogether; if theory is too long for one page,
-        # ReportLab will gracefully overflow (paragraphs are natively splittable).
-        elements.append(KeepTogether(theory_flowables))
+        elements.extend(_build_theory_section(theory_raw, styles, content_width))
 
     # ── SOURCE CODE ──
     code_raw = experiment.get("source_code", "")

@@ -3,10 +3,12 @@
  */
 import { useState, useEffect } from 'react';
 import { getCourses } from '../services/api';
+import HowItWorksModal from '../components/HowItWorksModal';
 
 function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
   const [coursesData, setCoursesData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isHiwOpen, setIsHiwOpen] = useState(false);
   const [error, setError] = useState(null);
 
   // Time-ago formatter
@@ -263,7 +265,7 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </button>
-          <button className="btn btn-outline-glow btn-lg hero-cta-secondary" onClick={scrollToGenerator}>
+          <button className="btn btn-outline-glow btn-lg hero-cta-secondary" onClick={() => setIsHiwOpen(true)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
             </svg>
@@ -714,6 +716,13 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
           </div>
         </div>
       )}
+
+      {/* How It Works Modal */}
+      <HowItWorksModal
+        isOpen={isHiwOpen}
+        onClose={() => setIsHiwOpen(false)}
+        onStartGenerating={scrollToGenerator}
+      />
     </div>
   );
 }

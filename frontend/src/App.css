@@ -984,3 +984,668 @@
   .error-state-actions { flex-direction: column; width: 100%; }
   .error-state-actions .btn { width: 100%; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   How It Works — Walkthrough Modal
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Overlay ────────────────────────────────────────────── */
+.hiw-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  padding: var(--space-lg);
+  opacity: 0;
+  pointer-events: none;
+}
+.hiw-overlay.visible {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── Modal ──────────────────────────────────────────────── */
+.hiw-modal {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  background: linear-gradient(168deg, #10162a 0%, #0d1220 50%, #0a0f1c 100%);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(124, 58, 237, 0.08),
+    0 0 1px rgba(255, 255, 255, 0.06) inset;
+  overflow: hidden;
+  transform: scale(0.92) translateY(20px);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  opacity: 0;
+}
+.hiw-overlay.visible .hiw-modal {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* ─── Close button ───────────────────────────────────────── */
+.hiw-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hiw-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ─── Progress Bar ───────────────────────────────────────── */
+.hiw-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.hiw-progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 0 4px 4px 0;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
+}
+
+/* ─── Content Layout ─────────────────────────────────────── */
+.hiw-content {
+  display: flex;
+  min-height: 460px;
+  overflow: hidden;
+}
+
+/* ─── Left Panel — Mock UI ───────────────────────────────── */
+.hiw-mock-panel {
+  position: relative;
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, rgba(124, 58, 237, 0.04), rgba(6, 182, 212, 0.03));
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+.hiw-mock-glow {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.15), transparent 70%);
+  top: 20%;
+  left: 30%;
+  pointer-events: none;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* ─── Mock Screen Base ───────────────────────────────────── */
+.hiw-mock {
+  position: absolute;
+  width: 340px;
+  border-radius: 12px;
+  background: #0f1420;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(124, 58, 237, 0.06);
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.9) translateY(16px);
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.hiw-mock.active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+/* Title bar */
+.hiw-mock-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.hiw-mock-dots {
+  display: flex;
+  gap: 5px;
+}
+.hiw-mock-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+.hiw-mock-url {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  opacity: 0.6;
+}
+
+/* Mock body */
+.hiw-mock-body {
+  padding: 14px;
+}
+.hiw-mock-body-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 14px;
+  gap: 10px;
+}
+
+/* Mock card */
+.hiw-mock-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 14px;
+}
+.hiw-mock-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.hiw-mock-emoji { font-size: 1.3rem; }
+.hiw-mock-card-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+.hiw-mock-card-sub {
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+}
+
+/* Mock fields */
+.hiw-mock-fields { display: flex; flex-direction: column; gap: 8px; }
+.hiw-mock-row { display: flex; gap: 8px; }
+.hiw-mock-field { flex: 1; }
+.hiw-mock-label {
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+}
+.hiw-mock-select, .hiw-mock-input {
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.65rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-sans);
+}
+.hiw-mock-chevron {
+  font-size: 0.5rem;
+  opacity: 0.4;
+}
+
+/* Glow pulse on active fields */
+.hiw-glow-pulse {
+  border-color: rgba(124, 58, 237, 0.4) !important;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.12);
+  animation: borderGlow 2.5s ease-in-out infinite;
+}
+
+/* Typing cursor */
+.hiw-mock-typing {
+  position: relative;
+  overflow: hidden;
+}
+.hiw-typing-text {
+  background: linear-gradient(90deg, var(--text-primary) 60%, transparent 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hiw-typing-cursor {
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  background: var(--primary);
+  margin-left: 2px;
+  animation: hiwBlink 0.8s steps(2) infinite;
+  vertical-align: middle;
+}
+@keyframes hiwBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Mode cards */
+.hiw-mock-mode-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.hiw-mock-mode-card {
+  flex: 1;
+  text-align: center;
+  padding: 10px 8px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  transition: all 0.2s;
+}
+.hiw-mock-mode-active {
+  border-color: rgba(124, 58, 237, 0.5);
+  background: rgba(124, 58, 237, 0.08);
+  color: var(--text-primary);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.1);
+}
+.hiw-mock-mode-label {
+  font-size: 0.6rem;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+/* Generate button mock */
+.hiw-mock-generate-btn {
+  margin-top: 14px;
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: 8px;
+  padding: 9px;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.25);
+}
+
+/* ─── Loading Screen Mock ────────────────────────────────── */
+.hiw-mini-flask {
+  animation: float 3s ease-in-out infinite;
+}
+.hiw-flask-liquid {
+  animation: hiwLiquidRise 3s ease-in-out infinite;
+}
+@keyframes hiwLiquidRise {
+  0%, 100% { y: 42; height: 36; }
+  50% { y: 34; height: 44; }
+}
+.hiw-flask-bubble {
+  animation: hiwBubbleUp 2.2s ease-in-out infinite;
+}
+@keyframes hiwBubbleUp {
+  0% { cy: 65; opacity: 0.6; }
+  100% { cy: 35; opacity: 0; }
+}
+.hiw-mock-loading-text {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  text-align: center;
+}
+.hiw-mock-loading-timer {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  opacity: 0.5;
+}
+.hiw-mock-loading-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 0 12px;
+  margin-top: 6px;
+}
+.hiw-mock-step-done {
+  font-size: 0.6rem;
+  color: var(--success);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.8;
+}
+.hiw-mock-step-active {
+  font-size: 0.6rem;
+  color: var(--primary-lighter);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.hiw-mock-step-pending {
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+  padding-left: 20px;
+  opacity: 0.4;
+}
+.hiw-mini-spinner {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid rgba(167, 139, 250, 0.2);
+  border-top-color: var(--primary-lighter);
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ─── Preview Screen Mock ────────────────────────────────── */
+.hiw-mock-section {
+  margin-bottom: 10px;
+}
+.hiw-mock-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.12);
+  border-radius: 8px 8px 0 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--primary-lighter);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.hiw-mock-modify-btn {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.52rem;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--accent-light);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  cursor: default;
+}
+.hiw-mock-lang-badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.52rem;
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+.hiw-mock-section-body {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hiw-mock-text-line {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+}
+
+/* Code block mock */
+.hiw-mock-code-body {
+  padding: 10px;
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  line-height: 1.6;
+  color: #e6edf3;
+}
+.hiw-mock-code-line {
+  white-space: pre;
+}
+.hiw-c-kw { color: #ff7b72; }
+.hiw-c-fn { color: #d2a8ff; }
+.hiw-c-str { color: #a5d6ff; }
+
+/* ─── Download Screen Mock ───────────────────────────────── */
+.hiw-mock-viva-item {
+  padding: 6px 0;
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  line-height: 1.5;
+}
+.hiw-mock-viva-ans {
+  color: var(--text-tertiary);
+  padding-left: 8px;
+  margin-top: 2px;
+}
+.hiw-mock-download-bar {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.hiw-mock-dl-btn {
+  flex: 1;
+  text-align: center;
+  padding: 8px 6px;
+  border-radius: 8px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: default;
+}
+.hiw-mock-dl-pdf {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.2);
+}
+.hiw-mock-dl-docx {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--accent-light);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+.hiw-mock-dl-regen {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Right Panel — Text ─────────────────────────────────── */
+.hiw-text-panel {
+  flex: 0 0 360px;
+  padding: 40px 36px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hiw-step-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--primary-lighter);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  width: fit-content;
+  margin-bottom: 16px;
+}
+
+.hiw-step-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.25;
+  margin-bottom: 12px;
+  animation: slideUp 0.4s ease both;
+}
+
+.hiw-step-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 16px;
+  animation: slideUp 0.4s ease 0.05s both;
+}
+
+.hiw-step-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-light);
+  font-family: var(--font-display);
+  margin-bottom: 28px;
+  animation: slideUp 0.4s ease 0.1s both;
+}
+.hiw-step-highlight svg {
+  color: var(--accent);
+}
+
+/* ─── Step Dots ──────────────────────────────────────────── */
+.hiw-dots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.hiw-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
+  transition: all 0.3s ease;
+}
+.hiw-dot:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.3);
+}
+.hiw-dot.active {
+  background: var(--primary);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.5);
+  width: 24px;
+  border-radius: 4px;
+}
+.hiw-dot.completed {
+  background: var(--primary-lighter);
+  opacity: 0.6;
+}
+
+/* ─── Nav Buttons ────────────────────────────────────────── */
+.hiw-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* CTA glow on last step */
+.hiw-cta-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* ─── Keyboard Hint ──────────────────────────────────────── */
+.hiw-keyboard-hint {
+  margin-top: 20px;
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+  opacity: 0.4;
+  text-align: center;
+}
+.hiw-keyboard-hint kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hiw-overlay { padding: var(--space-sm); }
+  .hiw-modal { max-height: 95vh; }
+  .hiw-content {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .hiw-mock-panel {
+    min-height: 280px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 20px;
+  }
+  .hiw-mock {
+    width: 280px;
+  }
+  .hiw-text-panel {
+    flex: none;
+    padding: 24px 20px 20px;
+  }
+  .hiw-step-title { font-size: 1.2rem; }
+  .hiw-step-desc { font-size: 0.82rem; }
+  .hiw-keyboard-hint { display: none; }
+  .hiw-nav {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 480px) {
+  .hiw-mock { width: 250px; }
+  .hiw-mock-panel { min-height: 240px; }
+  .hiw-mock-row { flex-direction: column; }
+}

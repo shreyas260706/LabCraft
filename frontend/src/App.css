@@ -718,57 +718,122 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Generation Loading View — Premium AI Loading Experience
+   Generation Loading View — Laboratory Flask Experience
    ═══════════════════════════════════════════════════════════ */
 
 .gen-loading-view {
   display: flex; flex-direction: column; align-items: center;
   max-width: 560px; margin: 0 auto; padding: var(--space-xl) var(--space-lg);
   animation: fadeIn var(--duration-normal) var(--ease-out);
-  position: relative;
+  position: relative; min-height: 500px;
 }
 
-/* Ambient glow behind loader */
-.gen-loading-glow {
-  position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
-  width: 320px; height: 320px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%);
-  filter: blur(60px); pointer-events: none; z-index: 0;
-  animation: glowDrift3 8s ease-in-out infinite alternate;
+/* ─── Animated Gradient Background ───────────────────────── */
+.gen-loading-bg {
+  position: absolute; inset: -60px; z-index: 0; pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 40%,
+    rgba(124,58,237,0.08) 0%,
+    rgba(6,182,212,0.04) 40%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  animation: bgPulse 6s ease-in-out infinite alternate;
+}
+@keyframes bgPulse {
+  0%   { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 1;   transform: scale(1.08); }
 }
 
-/* ─── AI Orb ─────────────────────────────────────────────── */
-.gen-orb-container {
-  position: relative; width: 80px; height: 80px; margin-bottom: var(--space-xl); z-index: 1;
+/* ─── Floating Particles ─────────────────────────────────── */
+.gen-particles {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
 }
-.gen-orb {
-  position: relative; width: 100%; height: 100%;
+.gen-particle {
+  position: absolute; border-radius: 50%;
+  background: rgba(167,139,250,0.35);
+  animation: particleFloat linear infinite;
+  box-shadow: 0 0 6px rgba(124,58,237,0.2);
+}
+@keyframes particleFloat {
+  0%   { transform: translateY(0) translateX(0) scale(1);   opacity: 0; }
+  10%  { opacity: 0.7; }
+  50%  { transform: translateY(-60px) translateX(15px) scale(1.2); opacity: 0.5; }
+  90%  { opacity: 0.2; }
+  100% { transform: translateY(-120px) translateX(-10px) scale(0.6); opacity: 0; }
+}
+
+/* ─── Flask + Progress Ring Container ────────────────────── */
+.gen-flask-container {
+  position: relative; width: 160px; height: 160px;
+  margin-bottom: var(--space-xl); z-index: 1;
   display: flex; align-items: center; justify-content: center;
 }
-.gen-orb-core {
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--gradient-primary);
-  box-shadow: 0 0 30px var(--primary-glow), 0 0 60px rgba(124,58,237,0.15);
-  animation: pulse 2s ease-in-out infinite;
+
+/* ─── Progress Ring (SVG) ────────────────────────────────── */
+.gen-progress-ring {
+  position: absolute; width: 160px; height: 160px;
+  transform: rotate(0deg);
 }
-.gen-orb-ring {
-  position: absolute; border-radius: 50%;
-  border: 1.5px solid transparent; animation: spin linear infinite;
+.gen-progress-ring-fill {
+  transition: stroke-dashoffset 400ms ease-out;
+  filter: drop-shadow(0 0 6px rgba(124,58,237,0.4));
 }
-.gen-orb-ring-1 {
-  width: 52px; height: 52px; top: 14px; left: 14px;
-  border-top-color: var(--primary-light); border-right-color: rgba(124,58,237,0.2);
-  animation-duration: 2s;
+
+/* ─── Flask SVG ──────────────────────────────────────────── */
+.gen-flask-svg {
+  width: 80px; height: 100px;
+  filter: drop-shadow(0 4px 20px rgba(124,58,237,0.2))
+          drop-shadow(0 0 40px rgba(6,182,212,0.1));
+  z-index: 2;
 }
-.gen-orb-ring-2 {
-  width: 68px; height: 68px; top: 6px; left: 6px;
-  border-bottom-color: var(--accent); border-left-color: rgba(6,182,212,0.15);
-  animation-duration: 3s; animation-direction: reverse;
+.gen-flask-outline {
+  filter: drop-shadow(0 0 4px rgba(167,139,250,0.3));
 }
-.gen-orb-ring-3 {
-  width: 80px; height: 80px; top: 0; left: 0;
-  border-top-color: rgba(167,139,250,0.3); border-right-color: rgba(34,211,238,0.15);
-  animation-duration: 5s;
+
+/* ─── Liquid Fill Animation ──────────────────────────────── */
+.gen-liquid {
+  animation: liquidRise 4s ease-out forwards;
+}
+@keyframes liquidRise {
+  0%   { y: 72; height: 0; }
+  100% { y: 30; height: 50; }
+}
+
+/* ─── Liquid Wave Animations ─────────────────────────────── */
+.gen-liquid-wave {
+  animation: waveMotion 3s ease-in-out infinite;
+  transform-origin: center;
+}
+.gen-liquid-wave-2 {
+  animation: waveMotion 3.5s ease-in-out infinite reverse;
+  transform-origin: center;
+}
+@keyframes waveMotion {
+  0%, 100% { transform: translateX(-2px); }
+  50%      { transform: translateX(2px); }
+}
+
+/* ─── Bubbles Inside Flask ───────────────────────────────── */
+.gen-bubble {
+  animation: bubbleRise ease-in infinite;
+  opacity: 0;
+}
+@keyframes bubbleRise {
+  0%   { transform: translateY(0) scale(1);    opacity: 0; }
+  10%  { opacity: 0.7; }
+  60%  { opacity: 0.4; }
+  100% { transform: translateY(-35px) scale(0.3); opacity: 0; }
+}
+
+/* ─── Flask Inner Glow ───────────────────────────────────── */
+.gen-flask-glow {
+  animation: innerGlow 3s ease-in-out infinite alternate;
+}
+@keyframes innerGlow {
+  0%   { opacity: 0.1; rx: 10; ry: 6; }
+  100% { opacity: 0.25; rx: 14; ry: 9; }
 }
 
 /* ─── Rotating Message ───────────────────────────────────── */
@@ -849,25 +914,6 @@
 .gen-step.completed .gen-step-label { color: var(--success); }
 .gen-step.active .gen-step-label { color: var(--text-primary); }
 
-/* ─── Skeleton Document Preview ──────────────────────────── */
-.gen-skeleton-preview {
-  width: 100%; max-width: 400px; z-index: 1;
-}
-.gen-skeleton-doc {
-  background: rgba(255,255,255,0.02); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: var(--space-lg);
-  display: flex; flex-direction: column; gap: var(--space-md);
-}
-.gen-skeleton-doc-header { display: flex; flex-direction: column; gap: 8px; }
-.gen-skeleton-doc-title { padding: var(--space-sm) 0; }
-.gen-skeleton-doc-body { display: flex; flex-direction: column; gap: 8px; }
-.gen-sk-line { border-radius: 4px; }
-.gen-skeleton-code-block {
-  display: flex; flex-direction: column; gap: 6px;
-  padding: var(--space-md); background: rgba(0,0,0,0.3);
-  border-radius: var(--radius-sm); border: 1px solid var(--border);
-}
-
 /* ─── Error State Card ───────────────────────────────────── */
 .error-state-card {
   max-width: 480px; margin: var(--space-2xl) auto; text-align: center;
@@ -927,16 +973,13 @@
   white-space: pre-wrap; word-break: break-word;
 }
 
-/* ─── Responsive (new components) ────────────────────────── */
+/* ─── Responsive (loading components) ────────────────────── */
 @media (max-width: 768px) {
-  .gen-loading-view { padding: var(--space-lg) var(--space-md); }
-  .gen-orb-container { width: 64px; height: 64px; }
-  .gen-orb-ring-1 { width: 40px; height: 40px; top: 12px; left: 12px; }
-  .gen-orb-ring-2 { width: 52px; height: 52px; top: 6px; left: 6px; }
-  .gen-orb-ring-3 { width: 64px; height: 64px; }
-  .gen-orb-core { width: 22px; height: 22px; }
+  .gen-loading-view { padding: var(--space-lg) var(--space-md); min-height: 420px; }
+  .gen-flask-container { width: 120px; height: 120px; }
+  .gen-flask-svg { width: 60px; height: 76px; }
+  .gen-progress-ring { width: 120px; height: 120px; }
   .gen-message { font-size: 0.92rem; }
-  .gen-skeleton-preview { max-width: 100%; }
   .error-state-card { margin: var(--space-xl) var(--space-md); padding: var(--space-xl); }
   .error-state-actions { flex-direction: column; width: 100%; }
   .error-state-actions .btn { width: 100%; }

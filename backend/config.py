@@ -7,6 +7,13 @@ class Config:
     _keys_str = os.environ.get("GEMINI_API_KEYS", os.environ.get("GEMINI_API_KEY", ""))
     GEMINI_KEYS = [k.strip() for k in _keys_str.split(",") if k.strip()]
     
+    # Groq fallback keys (optional)
+    _groq_str = os.environ.get("GROQ_API_KEYS", "")
+    GROQ_KEYS = [k.strip() for k in _groq_str.split(",") if k.strip()]
+    
+    # Redis URL (optional)
+    REDIS_URL = os.environ.get("REDIS_URL", "")
+    
     GEMINI_MODEL = "gemini-2.5-flash"
     MAX_RETRIES = 3  # Retry count for JSON validation failures
     TEMP_DIR = os.path.join(os.path.dirname(__file__), "tmp")
@@ -20,3 +27,9 @@ class Config:
         # Ensure at least one Gemini API key is present
         if not Config.GEMINI_KEYS:
             raise ValueError("No Gemini API keys found. Please set GEMINI_API_KEYS in .env")
+        
+        # Log provider availability
+        print(f"[Config] Gemini keys loaded: {len(Config.GEMINI_KEYS)}")
+        print(f"[Config] Groq keys loaded: {len(Config.GROQ_KEYS)} {'(fallback ready)' if Config.GROQ_KEYS else '(no fallback)'}")
+        print(f"[Config] Redis: {'configured' if Config.REDIS_URL else 'disabled'}")
+

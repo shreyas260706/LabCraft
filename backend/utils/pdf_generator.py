@@ -294,8 +294,22 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
 
     # ── THEORY ──
     elements.append(Paragraph("THEORY", styles["SectionHead"]))
-    theory = experiment.get("theory", "").replace("\n", "<br/>")
-    elements.append(Paragraph(theory, styles["BodyText2"]))
+    theory_raw = experiment.get("theory", "")
+    # Parse theory into structured paragraphs (definition + numbered points)
+    theory_lines = [line.strip() for line in theory_raw.split("\n") if line.strip()]
+    for line in theory_lines:
+        # Detect numbered points (e.g. "1. ...", "2. ...") or bullets ("• ...", "- ...")
+        is_point = (
+            re.match(r'^\d+[\.\)]\s', line) or
+            line.startswith("• ") or
+            line.startswith("- ") or
+            line.startswith("* ")
+        )
+        if is_point:
+            elements.append(Paragraph(line, styles["BodyText2"]))
+        else:
+            elements.append(Paragraph(line, styles["BodyText2"]))
+        elements.append(Spacer(1, 3))
 
     # ── SOURCE CODE ──
     elements.append(Paragraph("SOURCE CODE", styles["SectionHead"]))

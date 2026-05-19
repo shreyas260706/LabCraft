@@ -148,11 +148,39 @@ export const downloadExperiment = async (experiment, format) => {
     { responseType: 'blob' }
   );
 
-  const url = window.URL.createObjectURL(response.data);
+  // Detect if server returned a JSON error inside the blob
+  const blob = response.data;
+  if (blob.type && blob.type.includes('application/json')) {
+    const text = await blob.text();
+    try {
+      const errData = JSON.parse(text);
+      throw new Error(errData.error || errData.message || 'Server returned an error');
+    } catch (e) {
+      if (e.message !== 'Server returned an error' && e instanceof SyntaxError) {
+        throw new Error('Download failed: unexpected response from server');
+      }
+      throw e;
+    }
+  }
+
+  // Validate blob is not empty
+  if (!blob || blob.size === 0) {
+    throw new Error('Download failed: received empty file');
+  }
+
+  // Extract filename from Content-Disposition header if available
+  const ext = format === 'pdf' ? 'pdf' : 'docx';
+  let filename = `Experiment_${experiment.experiment_no}.${ext}`;
+  const disposition = response.headers?.['content-disposition'];
+  if (disposition) {
+    const match = disposition.match(/filename[^;=\n]*=(['"]?)([^'";\n]*)\1/);
+    if (match && match[2]) filename = match[2];
+  }
+
+  const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  const ext = format === 'pdf' ? 'pdf' : 'docx';
-  link.download = `Experiment_${experiment.experiment_no}.${ext}`;
+  link.download = filename;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

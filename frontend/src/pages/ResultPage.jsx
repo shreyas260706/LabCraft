@@ -166,9 +166,28 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
       } else {
         await downloadPPT(pptData);
       }
-      showToast(`Downloaded as ${format.toUpperCase()}`);
+      showToast(`Downloaded as ${format.toUpperCase()}`, 'success');
     } catch (err) {
-      showToast('Download failed', 'error');
+      // Extract the most specific error message available
+      let msg = 'Download failed';
+      if (err.message) {
+        msg = err.message;
+      } else if (err.response?.data) {
+        // If the error response has data (could be blob or JSON)
+        try {
+          const text = typeof err.response.data === 'string'
+            ? err.response.data
+            : await err.response.data?.text?.();
+          if (text) {
+            const parsed = JSON.parse(text);
+            msg = parsed.error || parsed.message || msg;
+          }
+        } catch {
+          // Fallback — just use the status text
+          msg = err.response?.statusText || msg;
+        }
+      }
+      showToast(msg, 'error');
     } finally {
       setDownloading(null);
     }

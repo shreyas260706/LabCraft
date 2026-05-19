@@ -21,6 +21,15 @@
               "language": "Java"
             }
           ]
+        },
+        {
+          "number": 5,
+          "subjects": [
+            {
+              "name": "Operating Systems",
+              "language": "C"
+            }
+          ]
         }
       ]
     }

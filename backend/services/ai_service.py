@@ -13,6 +13,7 @@ from google import genai
 from config import Config
 from flask import request
 from threading import Lock
+from services.syllabus_matcher import match_topic, build_context_injection
 
 
 # ─── Pydantic Schemas ───────────────────────────────────────────────
@@ -497,6 +498,17 @@ def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str =
 - Write exactly: "(Not included)"
 - Do NOT generate any output"""
 
+    # ─── Syllabus-Aware Context Enhancement ─────────────────
+    syllabus_context = ""
+    syllabus_match = match_topic(subject, topic)
+    if syllabus_match.matched:
+        syllabus_context = build_context_injection(syllabus_match)
+        print(f"[AI Service] SYLLABUS ENHANCEMENT: '{syllabus_match.experiment.get('title')}' "
+              f"(confidence={syllabus_match.confidence:.2f})")
+    else:
+        print(f"[AI Service] SYLLABUS FALLBACK: no match for '{topic}' "
+              f"(confidence={syllabus_match.confidence:.2f})")
+
     # ─── Layer 3: AI Generation (Gemini → Groq) ────────────────
     prompt = f"""You are an expert lab instructor for Indian university students.
 Generate a complete lab experiment file for the following:
@@ -504,7 +516,7 @@ Generate a complete lab experiment file for the following:
 Subject: {subject}
 Experiment Number: {experiment_no}
 Topic/Title: {topic}
-
+{syllabus_context}
 STRUCTURE (MUST FOLLOW EXACTLY):
 1. AIM:
 - 1-2 line clear statement
@@ -552,6 +564,11 @@ STRICT RULES:
     data["subject"] = subject
     data["topic"] = topic
     data["_cached"] = False
+    data["_syllabus_matched"] = syllabus_match.matched
+    data["_syllabus_confidence"] = syllabus_match.confidence
+    if syllabus_match.matched:
+        data["_syllabus_title"] = syllabus_match.experiment.get("title", "")
+        data["_syllabus_category"] = syllabus_match.experiment.get("category", "")
 
     return data
 

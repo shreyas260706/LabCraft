@@ -40,6 +40,13 @@ def _strip_code_fences(code: str) -> str:
     return code
 
 
+def _unescape_text(text: str) -> str:
+    """Unescape literal \\n and \\t sequences from AI-generated text."""
+    if not isinstance(text, str):
+        return text
+    return text.replace("\\n", "\n").replace("\\t", "\t")
+
+
 def _reformat_single_line_code(code: str) -> str:
     """
     Detect if code was collapsed into a single line and reformat it.

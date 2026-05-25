@@ -43,15 +43,16 @@ def generate_experiment_route():
         return jsonify({"error": "experiment_no must be a number"}), 400
 
     ip = request.remote_addr
+    force_refresh = data.get("force_refresh", False)
 
     # Rate limit check — skip if result is already cached (no API call needed)
-    if not is_experiment_cached(subject, topic, options):
+    if force_refresh or not is_experiment_cached(subject, topic, options):
         limit_error = check_generate_limit(ip)
         if limit_error:
             return jsonify({"error": limit_error}), 429
 
     try:
-        result = generate_experiment(subject, experiment_no, topic, aim, options)
+        result = generate_experiment(subject, experiment_no, topic, aim, options, force_refresh)
 
         # Only count towards limit if it was an actual API call (not a cache hit)
         if not result.get("_cached", False):

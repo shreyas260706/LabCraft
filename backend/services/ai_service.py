@@ -346,7 +346,7 @@ def _generate_with_retry(prompt: str, schema, max_retries: int = None):
 
 # ─── Public API ─────────────────────────────────────────────────────
 
-def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str = None, options: dict = None) -> dict:
+def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str = None, options: dict = None, force_refresh: bool = False) -> dict:
     """Generate a complete lab experiment with strict formatting."""
 
     if not subject or not topic:
@@ -384,27 +384,29 @@ def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str =
         final_aim = f"To study and implement {topic}."
 
     # ─── Layer 1: In-memory cache ───────────────────────────────
-    cached_data = _cache_get(cache_key)
-    if cached_data:
-        data = json.loads(json.dumps(cached_data))
-        data["experiment_no"] = experiment_no
-        data["aim"] = final_aim
-        data["subject"] = subject
-        data["topic"] = topic
-        data["_cached"] = True
-        return data
+    if not force_refresh:
+        cached_data = _cache_get(cache_key)
+        if cached_data:
+            data = json.loads(json.dumps(cached_data))
+            data["experiment_no"] = experiment_no
+            data["aim"] = final_aim
+            data["subject"] = subject
+            data["topic"] = topic
+            data["_cached"] = True
+            return data
 
     # ─── Layer 2: Redis cache ───────────────────────────────────
-    redis_data = _redis_get(redis_key)
-    if redis_data:
-        # Populate in-memory cache from Redis for faster future hits
-        _cache_set(cache_key, redis_data)
-        redis_data["experiment_no"] = experiment_no
-        redis_data["aim"] = final_aim
-        redis_data["subject"] = subject
-        redis_data["topic"] = topic
-        redis_data["_cached"] = True
-        return redis_data
+    if not force_refresh:
+        redis_data = _redis_get(redis_key)
+        if redis_data:
+            # Populate in-memory cache from Redis for faster future hits
+            _cache_set(cache_key, redis_data)
+            redis_data["experiment_no"] = experiment_no
+            redis_data["aim"] = final_aim
+            redis_data["subject"] = subject
+            redis_data["topic"] = topic
+            redis_data["_cached"] = True
+            return redis_data
 
     # ─── Build dynamic prompt based on options ──────────────────
     theory_instructions = ""

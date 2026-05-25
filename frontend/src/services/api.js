@@ -82,6 +82,11 @@ export const localCache = {
       }));
     } catch { /* storage full — silently fail */ }
   },
+  remove(subject, topic, options = {}) {
+    try {
+      localStorage.removeItem(_normalizeCacheKey(subject, topic, options));
+    } catch { /* ignore */ }
+  },
 
   getPPT(subject, topic) {
     try {
@@ -107,6 +112,11 @@ export const localCache = {
       }));
     } catch { /* storage full — silently fail */ }
   },
+  removePPT(subject, topic) {
+    try {
+      localStorage.removeItem(`${CACHE_PREFIX}ppt_${(subject || '').trim().toLowerCase()}_${(topic || '').trim().toLowerCase()}`);
+    } catch { /* ignore */ }
+  },
 };
 
 // ─── Courses ───────────────────────────────────────────────
@@ -116,12 +126,13 @@ export const getCourses = async () => {
 };
 
 // ─── Experiment ────────────────────────────────────────────
-export const generateExperiment = async (subject, experimentNo, topic, options = {}) => {
+export const generateExperiment = async (subject, experimentNo, topic, options = {}, forceRefresh = false) => {
   const { data } = await api.post('/generate-experiment', {
     subject,
     experiment_no: experimentNo,
     topic,
     options,
+    force_refresh: forceRefresh,
   });
   return data;
 };
@@ -136,8 +147,13 @@ export const modifySection = async (experiment, section, instruction) => {
 };
 
 // ─── PPT ───────────────────────────────────────────────────
-export const generatePPT = async (subject, topic, options = {}) => {
-  const { data } = await api.post('/generate-ppt', { subject, topic, options });
+export const generatePPT = async (subject, topic, options = {}, forceRefresh = false) => {
+  const { data } = await api.post('/generate-ppt', { 
+    subject, 
+    topic, 
+    options,
+    force_refresh: forceRefresh,
+  });
   return data;
 };
 

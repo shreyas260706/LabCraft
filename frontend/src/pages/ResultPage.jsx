@@ -106,21 +106,29 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleGenerate = async (isBackgroundRefresh = false) => {
+  const handleGenerate = async (isBackgroundRefresh = false, forceRefresh = false) => {
     if (!isBackgroundRefresh) {
       setLoading(true);
       setError(null);
     }
 
+    if (forceRefresh) {
+      if (isExperiment) {
+        localCache.remove(config.subject, config.topic, config.options || {});
+      } else {
+        localCache.removePPT(config.subject, config.topic);
+      }
+    }
+
     try {
       if (isExperiment) {
-        const data = await generateExperiment(config.subject, config.experimentNo, config.topic, config.options || {});
+        const data = await generateExperiment(config.subject, config.experimentNo, config.topic, config.options || {}, forceRefresh);
         setExperimentData(data);
         // Save to local cache
         localCache.set(config.subject, config.topic, config.options || {}, data);
         if (!isBackgroundRefresh) onSaveHistory?.(config, data);
       } else {
-        const data = await generatePPT(config.subject, config.topic, config.options || {});
+        const data = await generatePPT(config.subject, config.topic, config.options || {}, forceRefresh);
         setPptData(data);
         localCache.setPPT(config.subject, config.topic, data);
         if (!isBackgroundRefresh) onSaveHistory?.(config, data);
@@ -247,7 +255,7 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
         {showRetry && (
           <div className="gen-retry-bar">
             <span>This is taking longer than expected.</span>
-            <button className="btn btn-ghost btn-sm" onClick={() => handleGenerate()}>
+            <button className="btn btn-ghost btn-sm" onClick={() => handleGenerate(false, true)}>
               Retry
             </button>
           </div>
@@ -268,7 +276,7 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
           <h3 className="error-state-title">Generation Failed</h3>
           <p className="error-state-message">{error}</p>
           <div className="error-state-actions">
-            <button className="btn btn-primary btn-sm" onClick={() => handleGenerate()}>
+            <button className="btn btn-primary btn-sm" onClick={() => handleGenerate(false, true)}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="23 4 23 10 17 10"/>
                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>

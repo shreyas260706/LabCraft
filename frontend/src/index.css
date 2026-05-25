@@ -453,3 +453,310 @@ a:hover { color: var(--accent); }
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ─── Regenerate Button UX ──────────────────────────────── */
+.btn-regenerate {
+  background: rgba(124, 58, 237, 0.08);
+  color: var(--text-primary);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.05);
+  transition: all var(--duration-normal) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-regenerate::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.2), transparent);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.btn-regenerate:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.8);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.25);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-regenerate:hover::before {
+  left: 100%;
+  transition: left 0.8s ease-in-out;
+}
+
+.btn-regenerate svg {
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+.btn-regenerate:hover svg {
+  transform: rotate(180deg);
+}
+
+/* ─── Regeneration Overlay ──────────────────────────────── */
+.regen-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(11, 15, 26, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: inherit;
+  animation: fadeIn 0.4s ease-out forwards;
+  overflow: hidden;
+}
+
+.regen-success {
+  background: rgba(11, 15, 26, 0.85);
+  backdrop-filter: blur(16px);
+}
+
+.regen-bg-mesh {
+  position: absolute;
+  inset: -50%;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 30% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+  animation: spin 20s linear infinite;
+  pointer-events: none;
+}
+
+.regen-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.regen-particle {
+  position: absolute;
+  background: #A78BFA;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #A78BFA;
+  animation: float linear infinite;
+  opacity: 0.6;
+}
+
+.regen-content-box {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2.5rem;
+  background: rgba(19, 24, 37, 0.7);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(124, 58, 237, 0.1);
+  backdrop-filter: blur(20px);
+  width: 90%;
+  max-width: 480px;
+  animation: scaleIn 0.5s var(--ease-spring) forwards;
+}
+
+/* Scanner Animation */
+.regen-scanner-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.regen-scanner-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  animation: pulseRing 3s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.ring-1 { width: 100%; height: 100%; animation-delay: 0s; }
+.ring-2 { width: 75%; height: 75%; animation-delay: 0.4s; }
+.ring-3 { width: 50%; height: 50%; animation-delay: 0.8s; }
+
+@keyframes pulseRing {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.regen-core-icon {
+  color: var(--primary-lighter);
+  filter: drop-shadow(0 0 8px var(--primary-glow));
+  z-index: 2;
+}
+
+.regen-scan-line {
+  position: absolute;
+  top: 0;
+  left: -20%;
+  width: 140%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  box-shadow: 0 0 10px var(--accent);
+  animation: scan 2s ease-in-out infinite alternate;
+  z-index: 3;
+}
+
+@keyframes scan {
+  0% { top: 0%; opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0.2; }
+}
+
+/* Terminal Log */
+.regen-terminal {
+  width: 100%;
+  background: #0B0F1A;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.regen-terminal-header {
+  background: #131825;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-red { background: #FF5F56; }
+.dot-yellow { background: #FFBD2E; }
+.dot-green { background: #27C93F; }
+
+.terminal-title {
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.regen-terminal-body {
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: #E2E8F0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.terminal-log {
+  display: flex;
+  align-items: flex-start;
+  transition: opacity 0.3s ease;
+}
+
+.terminal-log.dimmed {
+  opacity: 0.4;
+  color: #94A3B8;
+}
+
+.terminal-log.active {
+  color: var(--accent-light);
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+  color: var(--primary-lighter);
+  margin-right: 6px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.regen-success-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+.regen-success-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(52, 211, 153, 0.1);
+  border: 2px solid rgba(52, 211, 153, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #34D399;
+  box-shadow: 0 0 30px rgba(52, 211, 153, 0.3);
+  animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.regen-message.hidden, .terminal-log.hidden {
+  opacity: 0;
+  transform: translateY(4px);
+}
+.regen-message.visible, .terminal-log.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Regenerate Button Active/Spinning State ──────────── */
+.btn-regenerate.is-spinning {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.6);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+  pointer-events: none;
+}
+
+.btn-regenerate.is-spinning svg {
+  animation: spin 0.8s linear infinite;
+}
+
+/* ─── Content Reveal After Regeneration ────────────────── */
+@keyframes contentReveal {
+  0% {
+    opacity: 0.4;
+    filter: blur(4px) brightness(1.1);
+    transform: scale(0.995);
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(1px) brightness(1.05);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) brightness(1);
+    transform: scale(1);
+  }
+}
+
+.regen-content-reveal {
+  animation: contentReveal 0.6s var(--ease-out) forwards;
+}
+
+.regen-content-reveal .section-card,
+.regen-content-reveal .slide-card {
+  animation: slideUp 0.5s var(--ease-out) both;
+}
+
+.regen-content-reveal .section-card:nth-child(1),
+.regen-content-reveal .slide-card:nth-child(1) { animation-delay: 0ms; }
+.regen-content-reveal .section-card:nth-child(2),
+.regen-content-reveal .slide-card:nth-child(2) { animation-delay: 60ms; }
+.regen-content-reveal .section-card:nth-child(3),
+.regen-content-reveal .slide-card:nth-child(3) { animation-delay: 120ms; }
+.regen-content-reveal .section-card:nth-child(4),
+.regen-content-reveal .slide-card:nth-child(4) { animation-delay: 180ms; }
+.regen-content-reveal .section-card:nth-child(5),
+.regen-content-reveal .slide-card:nth-child(5) { animation-delay: 240ms; }

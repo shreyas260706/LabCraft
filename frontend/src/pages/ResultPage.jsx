@@ -12,6 +12,7 @@ import {
   localCache,
 } from '../services/api';
 import GenerationLoadingView from '../components/GenerationLoadingView';
+import RegenerationOverlay from '../components/RegenerationOverlay';
 
 // ─── Section config ──────────────────────────────────────
 const SECTIONS = [
@@ -34,6 +35,11 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
   const [openModify, setOpenModify] = useState(null);
   const [downloading, setDownloading] = useState(null);
   const [toast, setToast] = useState(null);
+
+  // Regeneration-specific state (decoupled from initial loading)
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [regenSuccess, setRegenSuccess] = useState(false);
+  const [contentFadeIn, setContentFadeIn] = useState(false);
 
   // Loading UX state
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -107,7 +113,15 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
   };
 
   const handleGenerate = async (isBackgroundRefresh = false, forceRefresh = false) => {
-    if (!isBackgroundRefresh) {
+    // Determine if we're regenerating (existing content + force refresh / direct call)
+    const hasExistingContent = isExperiment ? !!experimentData : !!pptData;
+    const isRegen = hasExistingContent && !isBackgroundRefresh;
+
+    if (isRegen) {
+      setIsRegenerating(true);
+      setRegenSuccess(false);
+      setError(null);
+    } else if (!isBackgroundRefresh) {
       setLoading(true);
       setError(null);
     }
@@ -124,7 +138,6 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
       if (isExperiment) {
         const data = await generateExperiment(config.subject, config.experimentNo, config.topic, config.options || {}, forceRefresh);
         setExperimentData(data);
-        // Save to local cache
         localCache.set(config.subject, config.topic, config.options || {}, data);
         if (!isBackgroundRefresh) onSaveHistory?.(config, data);
       } else {
@@ -133,13 +146,31 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
         localCache.setPPT(config.subject, config.topic, data);
         if (!isBackgroundRefresh) onSaveHistory?.(config, data);
       }
+
+      // Regeneration success celebration
+      if (isRegen) {
+        setRegenSuccess(true);
+        showToast('Fresh variation generated ✨', 'success');
+        setTimeout(() => {
+          setIsRegenerating(false);
+          setRegenSuccess(false);
+          setContentFadeIn(true);
+          setTimeout(() => setContentFadeIn(false), 600);
+        }, 800);
+        return; // Don't clear loading below
+      }
     } catch (err) {
-      if (!isBackgroundRefresh) {
+      if (isRegen) {
+        setIsRegenerating(false);
+        setRegenSuccess(false);
+        const msg = err.response?.data?.error || err.message || 'Regeneration failed';
+        showToast(msg, 'error');
+      } else if (!isBackgroundRefresh) {
         const msg = err.response?.data?.error || err.message || 'Generation failed';
         setError(msg);
       }
     } finally {
-      if (!isBackgroundRefresh) setLoading(false);
+      if (!isBackgroundRefresh && !isRegen) setLoading(false);
     }
   };
 
@@ -295,7 +326,12 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
   // ─── Experiment View ────────────────────────────────────
   if (isExperiment && experimentData) {
     return (
-      <div className="result-page">
+      <div className="result-page" style={{ position: 'relative' }}>
+        {/* Regeneration Overlay — renders on top of existing content */}
+        {isRegenerating && (
+          <RegenerationOverlay isExperiment={true} success={regenSuccess} />
+        )}
+
         {/* Header */}
         <div className="result-header">
           <button className="back-button" onClick={onBack}>← Back to Home</button>
@@ -314,7 +350,7 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
         )}
 
         {/* Sections */}
-        <div className="experiment-content">
+        <div className={`experiment-content${contentFadeIn ? ' regen-content-reveal' : ''}`}>
           {SECTIONS.map((sec) => (
             <div className="section-card" key={sec.key}>
               {/* Header */}
@@ -406,23 +442,27 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
           <button
             className="btn btn-primary btn-sm"
             onClick={() => handleDownload('pdf')}
-            disabled={downloading}
+            disabled={downloading || isRegenerating}
           >
             {downloading === 'pdf' ? 'Downloading...' : 'Download PDF'}
           </button>
           <button
             className="btn btn-accent btn-sm"
             onClick={() => handleDownload('docx')}
-            disabled={downloading}
+            disabled={downloading || isRegenerating}
           >
             {downloading === 'docx' ? 'Downloading...' : 'Download DOCX'}
           </button>
           <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => handleGenerate()}
-            disabled={loading}
+            className={`btn btn-regenerate btn-sm${isRegenerating ? ' is-spinning' : ''}`}
+            onClick={() => handleGenerate(false, true)}
+            disabled={isRegenerating}
           >
-            Regenerate
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            {isRegenerating ? 'Regenerating...' : 'Regenerate'}
           </button>
         </div>
 
@@ -437,7 +477,12 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
   // ─── PPT View ───────────────────────────────────────────
   if (!isExperiment && pptData) {
     return (
-      <div className="result-page">
+      <div className="result-page" style={{ position: 'relative' }}>
+        {/* Regeneration Overlay — renders on top of existing content */}
+        {isRegenerating && (
+          <RegenerationOverlay isExperiment={false} success={regenSuccess} />
+        )}
+
         <div className="result-header">
           <button className="back-button" onClick={onBack}>← Back to Home</button>
           <div className="result-meta">
@@ -446,7 +491,7 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
           </div>
         </div>
 
-        <div className="ppt-content">
+        <div className={`ppt-content${contentFadeIn ? ' regen-content-reveal' : ''}`}>
           <div className="slides-grid">
             {(pptData.slides || []).map((slide, i) => (
               <div className="slide-card" key={i} style={{ animationDelay: `${i * 60}ms` }}>
@@ -466,16 +511,20 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
           <button
             className="btn btn-primary btn-sm"
             onClick={() => handleDownload('pptx')}
-            disabled={downloading}
+            disabled={downloading || isRegenerating}
           >
             {downloading === 'pptx' ? 'Downloading...' : 'Download PPTX'}
           </button>
           <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => handleGenerate()}
-            disabled={loading}
+            className={`btn btn-regenerate btn-sm${isRegenerating ? ' is-spinning' : ''}`}
+            onClick={() => handleGenerate(false, true)}
+            disabled={isRegenerating}
           >
-            Regenerate
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            {isRegenerating ? 'Regenerating...' : 'Regenerate'}
           </button>
         </div>
 

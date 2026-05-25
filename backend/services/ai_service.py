@@ -470,6 +470,17 @@ def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str =
     else:
         output_instructions = "- Provide realistic sample output of the program, including the student name and roll number output"
 
+    # ─── Syllabus-Aware Context Enhancement ─────────────────
+    syllabus_context = ""
+    syllabus_match = match_topic(subject, topic)
+    if syllabus_match.matched:
+        syllabus_context = build_context_injection(syllabus_match)
+        print(f"[AI Service] SYLLABUS ENHANCEMENT: '{syllabus_match.experiment.get('title')}' "
+              f"(confidence={syllabus_match.confidence:.2f})")
+    else:
+        print(f"[AI Service] SYLLABUS FALLBACK: no match for '{topic}' "
+              f"(confidence={syllabus_match.confidence:.2f})")
+
     # ─── Style Profile Overrides ────────────────────────────────
     # When a style profile is matched (e.g., MAIT DBMS), override
     # default instructions with profile-specific formatting rules.
@@ -541,17 +552,6 @@ def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str =
 {output_instructions}""" if include_output else """5. OUTPUT:
 - Write exactly: "(Not included)"
 - Do NOT generate any output"""
-
-    # ─── Syllabus-Aware Context Enhancement ─────────────────
-    syllabus_context = ""
-    syllabus_match = match_topic(subject, topic)
-    if syllabus_match.matched:
-        syllabus_context = build_context_injection(syllabus_match)
-        print(f"[AI Service] SYLLABUS ENHANCEMENT: '{syllabus_match.experiment.get('title')}' "
-              f"(confidence={syllabus_match.confidence:.2f})")
-    else:
-        print(f"[AI Service] SYLLABUS FALLBACK: no match for '{topic}' "
-              f"(confidence={syllabus_match.confidence:.2f})")
 
     # ─── Layer 3: AI Generation (Gemini → Groq) ────────────────
     prompt = f"""You are an expert lab instructor for Indian university students.

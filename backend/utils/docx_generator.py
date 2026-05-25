@@ -27,7 +27,25 @@ def _strip_code_fences(code):
     return code
 
 
+def _unescape_text(text: str) -> str:
+    if not isinstance(text, str):
+        return text
+    return text.replace("\\n", "\n").replace("\\t", "\t")
+
+
 def generate_experiment_docx(experiment: dict) -> io.BytesIO:
+    # Unescape all text fields before rendering
+    for key, value in experiment.items():
+        if isinstance(value, str):
+            experiment[key] = _unescape_text(value)
+        elif isinstance(value, list) and key == "viva":
+            for qa in value:
+                if isinstance(qa, dict):
+                    if "question" in qa:
+                        qa["question"] = _unescape_text(qa["question"])
+                    if "answer" in qa:
+                        qa["answer"] = _unescape_text(qa["answer"])
+
     doc = Document()
     for s in doc.sections:
         s.top_margin = Cm(2.5)

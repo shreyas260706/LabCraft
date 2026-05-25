@@ -568,6 +568,18 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
     """
     buffer = io.BytesIO()
 
+    # Unescape all text fields before rendering
+    for key, value in experiment.items():
+        if isinstance(value, str):
+            experiment[key] = _unescape_text(value)
+        elif isinstance(value, list) and key == "viva":
+            for qa in value:
+                if isinstance(qa, dict):
+                    if "question" in qa:
+                        qa["question"] = _unescape_text(qa["question"])
+                    if "answer" in qa:
+                        qa["answer"] = _unescape_text(qa["answer"])
+
     exp_no = experiment.get("experiment_no", "")
     subject = experiment.get("subject", "")
 

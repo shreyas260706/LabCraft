@@ -1,0 +1,383 @@
+{
+  "subject": "DBMS",
+  "subject_aliases": ["dbms", "database", "database management system", "database management systems", "dbms lab", "database lab", "sql lab"],
+  "style_profile": "mait_dbms",
+  "language": "SQL",
+  "experiments": [
+    {
+      "experiment_no": 1,
+      "title": "MariaDB Introduction and Installation",
+      "keywords": ["mariadb", "mysql", "installation", "introduction", "database introduction", "mariadb installation", "install mariadb", "install mysql", "database setup"],
+      "theory_points": [
+        "MariaDB is an open-source relational database management system (RDBMS), a fork of MySQL",
+        "It uses Structured Query Language (SQL) for managing and manipulating data",
+        "MariaDB supports ACID properties: Atomicity, Consistency, Isolation, Durability",
+        "Key features include high availability, scalability, and security",
+        "It stores data in tables with rows and columns, organized into databases",
+        "MariaDB runs as a server process and clients connect to it using TCP/IP or socket connections"
+      ],
+      "applications": [
+        "Web application backends",
+        "Data warehousing",
+        "E-commerce platforms",
+        "Content management systems"
+      ],
+      "advantages": [
+        "Open-source and free to use",
+        "High performance and scalability",
+        "Strong community support",
+        "Compatible with MySQL"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["CREATE DATABASE", "SHOW DATABASES", "USE", "SHOW TABLES", "SELECT VERSION()"],
+      "viva_topics": ["RDBMS vs DBMS", "ACID properties", "MariaDB vs MySQL", "SQL categories", "database schema"],
+      "category": "Database Basics",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 2,
+      "title": "DDL Commands",
+      "keywords": ["ddl", "data definition language", "create table", "alter table", "drop table", "truncate", "rename", "ddl commands", "create", "alter", "drop"],
+      "theory_points": [
+        "DDL (Data Definition Language) commands define and modify the structure of database objects",
+        "CREATE is used to create databases, tables, views, indexes, and other objects",
+        "ALTER modifies the structure of an existing table — add, drop, modify columns",
+        "DROP permanently removes a database object and its data",
+        "TRUNCATE removes all rows from a table but retains the table structure",
+        "RENAME changes the name of an existing database object"
+      ],
+      "applications": [
+        "Schema design and modification",
+        "Database migration scripts",
+        "Table restructuring during development"
+      ],
+      "advantages": [
+        "Auto-committed — changes are permanent immediately",
+        "Essential for database schema management",
+        "Standardized across SQL implementations"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["CREATE TABLE", "ALTER TABLE ADD", "ALTER TABLE MODIFY", "ALTER TABLE DROP", "DROP TABLE", "TRUNCATE TABLE", "RENAME TABLE", "DESCRIBE"],
+      "viva_topics": ["DDL vs DML", "CREATE TABLE syntax", "ALTER vs DROP", "TRUNCATE vs DELETE", "AUTO_INCREMENT", "data types in SQL"],
+      "category": "DDL",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 3,
+      "title": "Constraints in SQL",
+      "keywords": ["constraints", "primary key", "foreign key", "unique", "not null", "check", "default", "sql constraints", "referential integrity"],
+      "theory_points": [
+        "Constraints are rules enforced on data columns to ensure data integrity and accuracy",
+        "PRIMARY KEY uniquely identifies each record in a table — cannot be NULL or duplicate",
+        "FOREIGN KEY establishes a link between data in two tables, enforcing referential integrity",
+        "UNIQUE ensures all values in a column are distinct",
+        "NOT NULL prevents NULL values from being inserted into a column",
+        "CHECK validates that values in a column satisfy a specific condition",
+        "DEFAULT assigns a default value to a column when no value is specified during insertion"
+      ],
+      "applications": [
+        "Ensuring data integrity in relational databases",
+        "Maintaining referential integrity between related tables",
+        "Enforcing business rules at the database level"
+      ],
+      "advantages": [
+        "Prevents invalid data entry",
+        "Maintains consistency across related tables",
+        "Reduces application-level validation code"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["PRIMARY KEY", "FOREIGN KEY REFERENCES", "UNIQUE", "NOT NULL", "CHECK", "DEFAULT", "CONSTRAINT", "ON DELETE CASCADE"],
+      "viva_topics": ["primary key vs unique key", "referential integrity", "ON DELETE CASCADE vs SET NULL", "composite primary key", "constraint violation errors"],
+      "category": "Constraints",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 4,
+      "title": "DML Commands",
+      "keywords": ["dml", "data manipulation language", "insert", "update", "delete", "select", "dml commands", "insert into", "update set", "delete from"],
+      "theory_points": [
+        "DML (Data Manipulation Language) commands are used to manipulate data within database tables",
+        "INSERT adds new rows of data into a table",
+        "UPDATE modifies existing data in one or more rows based on a condition",
+        "DELETE removes specific rows from a table based on a WHERE condition",
+        "SELECT retrieves data from one or more tables — the most frequently used SQL command",
+        "DML commands are not auto-committed and can be rolled back using ROLLBACK"
+      ],
+      "applications": [
+        "Data entry and modification in applications",
+        "Batch data updates and migrations",
+        "Data retrieval for reports and analytics"
+      ],
+      "advantages": [
+        "Support transaction control (COMMIT, ROLLBACK)",
+        "Can be conditional using WHERE clause",
+        "Essential for all CRUD operations"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["INSERT INTO", "INSERT INTO ... VALUES", "UPDATE ... SET ... WHERE", "DELETE FROM ... WHERE", "SELECT ... FROM ... WHERE"],
+      "viva_topics": ["DML vs DDL", "DELETE vs TRUNCATE", "INSERT with subquery", "UPDATE with JOIN", "WHERE clause operators"],
+      "category": "DML",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 5,
+      "title": "Built-in Functions and Clauses",
+      "keywords": ["built-in functions", "aggregate functions", "group by", "having", "order by", "count", "sum", "avg", "max", "min", "clauses", "string functions", "date functions"],
+      "theory_points": [
+        "Aggregate functions perform calculations on a set of values and return a single result",
+        "COUNT() returns the number of rows, SUM() returns total, AVG() returns average",
+        "MAX() and MIN() return the highest and lowest values respectively",
+        "GROUP BY groups rows sharing common values into summary rows",
+        "HAVING filters groups created by GROUP BY — similar to WHERE but for aggregates",
+        "ORDER BY sorts the result set in ascending (ASC) or descending (DESC) order",
+        "String functions include UPPER(), LOWER(), LENGTH(), CONCAT(), SUBSTRING()"
+      ],
+      "applications": [
+        "Generating summary reports and analytics",
+        "Data aggregation for dashboards",
+        "Sorting and filtering large datasets"
+      ],
+      "advantages": [
+        "Reduce application-level computation",
+        "Efficient data summarization at database level",
+        "Standardized across SQL implementations"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["COUNT()", "SUM()", "AVG()", "MAX()", "MIN()", "GROUP BY", "HAVING", "ORDER BY", "UPPER()", "LOWER()", "CONCAT()", "SUBSTRING()"],
+      "viva_topics": ["WHERE vs HAVING", "aggregate functions", "GROUP BY rules", "ORDER BY with multiple columns", "NULL handling in aggregates"],
+      "category": "Functions and Clauses",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 6,
+      "title": "Joins in SQL",
+      "keywords": ["join", "joins", "inner join", "left join", "right join", "full join", "cross join", "self join", "natural join", "sql joins"],
+      "theory_points": [
+        "Joins combine rows from two or more tables based on a related column between them",
+        "INNER JOIN returns only rows that have matching values in both tables",
+        "LEFT JOIN returns all rows from the left table and matched rows from the right table",
+        "RIGHT JOIN returns all rows from the right table and matched rows from the left table",
+        "FULL OUTER JOIN returns all rows when there is a match in either table",
+        "CROSS JOIN produces the Cartesian product of both tables",
+        "SELF JOIN joins a table with itself, useful for hierarchical data"
+      ],
+      "applications": [
+        "Combining related data from multiple tables",
+        "Generating reports spanning multiple entities",
+        "Hierarchical data queries using self joins"
+      ],
+      "advantages": [
+        "Avoids data redundancy by normalizing into multiple tables",
+        "Enables complex multi-table queries",
+        "Supports various relationship types"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN", "CROSS JOIN", "SELF JOIN", "NATURAL JOIN", "JOIN ... ON", "USING"],
+      "viva_topics": ["inner join vs outer join", "left join vs right join", "self join use cases", "Cartesian product", "equi join vs non-equi join", "natural join rules"],
+      "category": "Joins",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 7,
+      "title": "Subqueries in SQL",
+      "keywords": ["subquery", "subqueries", "nested query", "nested queries", "correlated subquery", "scalar subquery", "inline query", "sub query", "inner query"],
+      "theory_points": [
+        "A subquery is a query nested inside another SQL query (SELECT, INSERT, UPDATE, or DELETE)",
+        "Single-row subqueries return one row and use operators like =, <, >, <=, >=",
+        "Multi-row subqueries return multiple rows and use IN, ANY, ALL operators",
+        "Correlated subqueries reference columns from the outer query and execute once per row",
+        "Scalar subqueries return a single value and can be used in SELECT or WHERE clauses",
+        "Subqueries can appear in WHERE, FROM (derived tables), SELECT, and HAVING clauses"
+      ],
+      "applications": [
+        "Complex filtering based on aggregated data",
+        "Dynamic value comparisons across tables",
+        "Creating derived tables for complex analysis"
+      ],
+      "advantages": [
+        "Break complex queries into manageable parts",
+        "Can replace multiple JOINs in some scenarios",
+        "Support dynamic value computation within queries"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["subquery in WHERE", "subquery in FROM", "subquery in SELECT", "IN", "ANY", "ALL", "EXISTS", "correlated subquery"],
+      "viva_topics": ["correlated vs non-correlated subquery", "subquery vs join performance", "EXISTS vs IN", "scalar subquery", "derived tables"],
+      "category": "Subqueries",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 8,
+      "title": "Set Operations in SQL",
+      "keywords": ["set operations", "union", "union all", "intersect", "except", "minus", "set operators"],
+      "theory_points": [
+        "Set operations combine results of two or more SELECT statements",
+        "UNION combines results and removes duplicate rows from the output",
+        "UNION ALL combines results and retains all rows including duplicates",
+        "INTERSECT returns only rows that appear in both result sets",
+        "EXCEPT (or MINUS) returns rows from the first query that do not appear in the second",
+        "All set operations require the SELECT statements to have the same number and compatible data types of columns"
+      ],
+      "applications": [
+        "Combining data from similar tables or partitions",
+        "Finding common records across datasets",
+        "Identifying differences between two data sets"
+      ],
+      "advantages": [
+        "Simplify complex OR-based queries",
+        "Efficient for comparing data sets",
+        "Standardized SQL operations across databases"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["UNION", "UNION ALL", "INTERSECT", "EXCEPT", "MINUS"],
+      "viva_topics": ["UNION vs UNION ALL", "INTERSECT behavior", "EXCEPT vs NOT IN", "column compatibility rules", "order of set operations"],
+      "category": "Set Operations",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 9,
+      "title": "Views in SQL",
+      "keywords": ["views", "view", "create view", "virtual table", "updatable view", "materialized view", "with check option"],
+      "theory_points": [
+        "A view is a virtual table based on the result of a SELECT query",
+        "Views do not store data physically — they reference underlying base tables",
+        "CREATE VIEW defines a view, and DROP VIEW removes it",
+        "Updatable views allow INSERT, UPDATE, DELETE if they meet specific conditions",
+        "WITH CHECK OPTION ensures that modifications through the view satisfy the view's WHERE condition",
+        "Views provide data abstraction, security, and simplify complex queries"
+      ],
+      "applications": [
+        "Data security by restricting access to specific columns/rows",
+        "Simplifying complex multi-table queries for end users",
+        "Creating logical data abstractions"
+      ],
+      "advantages": [
+        "Provide data independence and abstraction",
+        "Enhance security by limiting data exposure",
+        "Simplify frequently used complex queries"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["CREATE VIEW", "CREATE OR REPLACE VIEW", "DROP VIEW", "WITH CHECK OPTION", "updatable views", "SELECT from view"],
+      "viva_topics": ["view vs table", "updatable view conditions", "WITH CHECK OPTION", "materialized view vs view", "view performance"],
+      "category": "Views",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 10,
+      "title": "Control Structures in SQL",
+      "keywords": ["control structures", "if", "if else", "case", "loop", "while loop", "repeat", "iterate", "leave", "control flow", "conditional statements"],
+      "theory_points": [
+        "Control structures in SQL allow conditional execution and iteration within stored programs",
+        "IF-THEN-ELSE executes different blocks of code based on a Boolean condition",
+        "CASE expression provides multi-way conditional logic — similar to switch-case",
+        "LOOP creates an unconditional loop that repeats until a LEAVE statement is encountered",
+        "WHILE loop repeats a block of code as long as a specified condition remains true",
+        "REPEAT loop executes at least once, then repeats until a condition becomes true",
+        "ITERATE skips the remaining code in a loop and starts the next iteration",
+        "LEAVE exits a loop or block immediately"
+      ],
+      "applications": [
+        "Implementing business logic in stored procedures",
+        "Iterative data processing within the database",
+        "Conditional data transformations"
+      ],
+      "advantages": [
+        "Reduce round-trips between application and database",
+        "Enable complex logic execution at database level",
+        "Improve performance for data-intensive operations"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["IF ... THEN ... ELSE ... END IF", "CASE ... WHEN ... THEN ... END CASE", "LOOP ... END LOOP", "WHILE ... DO ... END WHILE", "REPEAT ... UNTIL ... END REPEAT", "ITERATE", "LEAVE"],
+      "viva_topics": ["IF vs CASE", "WHILE vs REPEAT", "LEAVE vs ITERATE", "nested control structures", "CASE expression vs CASE statement"],
+      "category": "Control Structures",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 11,
+      "title": "Exception Handling in SQL",
+      "keywords": ["exception handling", "exception", "handler", "declare handler", "sqlexception", "sqlwarning", "signal", "resignal", "error handling", "condition handler"],
+      "theory_points": [
+        "Exception handling in SQL manages runtime errors within stored programs (procedures, functions, triggers)",
+        "DECLARE HANDLER defines a handler that executes when a specific condition occurs",
+        "Handler types: CONTINUE (resumes execution), EXIT (terminates the block), UNDO (rolls back)",
+        "SQLEXCEPTION handles all SQL error conditions",
+        "SQLWARNING handles warning conditions and NOT FOUND handles empty cursors",
+        "SIGNAL raises a user-defined exception with a custom error message",
+        "RESIGNAL re-raises a caught exception, optionally modifying its attributes"
+      ],
+      "applications": [
+        "Graceful error recovery in stored procedures",
+        "Custom error messages for application-level handling",
+        "Transaction safety with proper rollback on errors"
+      ],
+      "advantages": [
+        "Prevents stored program crashes on errors",
+        "Enables custom error codes and messages",
+        "Supports robust transaction management"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["DECLARE HANDLER", "DECLARE CONTINUE HANDLER", "DECLARE EXIT HANDLER", "SQLEXCEPTION", "SQLWARNING", "NOT FOUND", "SIGNAL SQLSTATE", "RESIGNAL", "GET DIAGNOSTICS"],
+      "viva_topics": ["CONTINUE vs EXIT handler", "SQLEXCEPTION vs SQLWARNING", "SIGNAL vs RESIGNAL", "named conditions", "error code vs SQLSTATE"],
+      "category": "Exception Handling",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 12,
+      "title": "Functions and Procedures in SQL",
+      "keywords": ["function", "procedure", "stored procedure", "stored function", "create procedure", "create function", "in out inout", "delimiter", "functions and procedures", "stored programs"],
+      "theory_points": [
+        "A stored procedure is a precompiled set of SQL statements stored in the database for reuse",
+        "A stored function returns a single value and can be used within SQL expressions",
+        "Procedures use IN (input), OUT (output), and INOUT (both) parameters",
+        "Functions must have a RETURNS clause specifying the return data type",
+        "DELIMITER changes the statement delimiter to allow semicolons inside procedure/function body",
+        "Procedures are called using CALL, while functions are invoked within SELECT or expressions",
+        "Both improve performance through precompilation and reduce network traffic"
+      ],
+      "applications": [
+        "Encapsulating business logic at the database level",
+        "Reusable code modules for common database operations",
+        "Batch data processing and complex calculations"
+      ],
+      "advantages": [
+        "Precompiled for better performance",
+        "Reduce code duplication and network traffic",
+        "Provide abstraction and security through encapsulation"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["CREATE PROCEDURE", "CREATE FUNCTION", "CALL", "IN", "OUT", "INOUT", "RETURNS", "RETURN", "DELIMITER", "DROP PROCEDURE", "DROP FUNCTION"],
+      "viva_topics": ["function vs procedure", "IN vs OUT vs INOUT", "DELIMITER usage", "RETURNS vs RETURN", "calling functions in SELECT", "dropping procedures"],
+      "category": "Functions and Procedures",
+      "style_profile": "mait_dbms"
+    },
+    {
+      "experiment_no": 13,
+      "title": "Triggers in SQL",
+      "keywords": ["trigger", "triggers", "before trigger", "after trigger", "insert trigger", "update trigger", "delete trigger", "new", "old", "create trigger"],
+      "theory_points": [
+        "A trigger is a stored program that automatically executes in response to DML events on a table",
+        "BEFORE triggers execute before the triggering DML operation is performed",
+        "AFTER triggers execute after the triggering DML operation is completed",
+        "Triggers can be defined for INSERT, UPDATE, and DELETE events",
+        "NEW refers to the new row data (available in INSERT and UPDATE triggers)",
+        "OLD refers to the existing row data (available in UPDATE and DELETE triggers)",
+        "Triggers are used for auditing, validation, enforcing complex business rules, and maintaining derived data"
+      ],
+      "applications": [
+        "Audit logging — tracking data changes automatically",
+        "Data validation beyond CHECK constraints",
+        "Maintaining denormalized summary tables",
+        "Enforcing complex cross-table business rules"
+      ],
+      "advantages": [
+        "Automatic execution — no explicit call needed",
+        "Centralized business rule enforcement",
+        "Support auditing and change tracking"
+      ],
+      "output_type": "terminal",
+      "sql_topics": ["CREATE TRIGGER", "BEFORE INSERT", "AFTER INSERT", "BEFORE UPDATE", "AFTER UPDATE", "BEFORE DELETE", "AFTER DELETE", "NEW", "OLD", "DROP TRIGGER", "SHOW TRIGGERS"],
+      "viva_topics": ["BEFORE vs AFTER trigger", "NEW vs OLD", "trigger vs stored procedure", "trigger execution order", "mutating table problem", "trigger use cases"],
+      "category": "Triggers",
+      "style_profile": "mait_dbms"
+    }
+  ]
+}

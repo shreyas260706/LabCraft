@@ -2,7 +2,7 @@
   "courses": [
     {
       "name": "B.Tech",
-      "branches": ["CSE", "IT", "CST"],
+      "branches": ["IT", "CSE", "CST", "CS-AI", "CS-DS", "AIML", "ECE"],
       "semesters": [
         {
           "number": 3,
@@ -19,6 +19,10 @@
             {
               "name": "Programming in Java",
               "language": "Java"
+            },
+            {
+              "name": "DBMS",
+              "language": "SQL"
             }
           ]
         },

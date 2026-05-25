@@ -1,0 +1,91 @@
+{
+  "profile_name": "mait_dbms",
+  "description": "MAIT University DBMS practical formatting style. Academic, concise, bullet-oriented theory with proper SQL formatting.",
+
+  "theory_style": {
+    "use_bullets": true,
+    "paragraph_size": "medium",
+    "tone": "academic concise",
+    "avoid_ai_fluff": true,
+    "include_definitions": true,
+    "include_characteristics": true,
+    "include_applications": true,
+    "rules": [
+      "Start with a clear 2-3 line definition of the concept",
+      "Follow with numbered bullet points for key concepts (1. 2. 3. ...)",
+      "Include characteristics or properties section where relevant",
+      "Include applications section where relevant",
+      "Keep each bullet point 1-2 lines maximum",
+      "Use academic concise language throughout",
+      "No ChatGPT-style long paragraphs",
+      "No motivational or explanatory filler",
+      "Format similar to DDL/Constraints/Joins style from MAIT PDF",
+      "Total theory length: 120-200 words"
+    ]
+  },
+
+  "sections_order": [
+    "AIM",
+    "THEORY",
+    "SOURCE CODE",
+    "OUTPUT",
+    "VIVA QUESTIONS"
+  ],
+
+  "code_style": {
+    "language": "SQL",
+    "use_uppercase_keywords": true,
+    "include_schema_setup": true,
+    "include_sample_data": true,
+    "keep_code_together": true,
+    "use_mariadb_syntax": true,
+    "rules": [
+      "Write SQL keywords in UPPERCASE (SELECT, FROM, WHERE, CREATE, INSERT, etc.)",
+      "Include CREATE TABLE with appropriate schema if needed for the experiment",
+      "Include INSERT INTO statements with realistic sample data",
+      "Show the actual SQL queries demonstrating the experiment topic",
+      "Use MariaDB/MySQL compatible syntax",
+      "Do NOT include comments in the code",
+      "Keep all SQL in a single code block",
+      "Use proper indentation for readability",
+      "Use DELIMITER for procedures/functions/triggers"
+    ]
+  },
+
+  "output_style": {
+    "terminal_like": true,
+    "center_images": true,
+    "show_query_result_tables": true,
+    "keep_code_together": true,
+    "rules": [
+      "Show output as it would appear in a MariaDB/MySQL terminal",
+      "Include the MariaDB prompt style where appropriate",
+      "Show query results in tabular format",
+      "Keep output realistic and matching the source code queries",
+      "Include 'Query OK' and 'rows affected' messages where appropriate"
+    ]
+  },
+
+  "viva_style": {
+    "basic_questions": 3,
+    "intermediate_questions": 2,
+    "technical_questions": 1,
+    "total_questions": 6,
+    "match_experiment_topic": true,
+    "rules": [
+      "Questions 1-3: Basic conceptual questions about the experiment topic",
+      "Questions 4-5: Intermediate application-based questions",
+      "Question 6: Technical or tricky question that tests deeper understanding",
+      "All questions must relate to the specific SQL concepts in the experiment",
+      "Answers should be concise (2-3 sentences max)",
+      "Style: university viva examination format"
+    ]
+  },
+
+  "formatting": {
+    "aim_style": "1-2 line clear statement starting with 'To study and implement'",
+    "page_layout": "A4 with professional margins",
+    "font_hierarchy": "Title > Section Heading > Body > Bullet > Code",
+    "spacing": "generous between sections, compact within"
+  }
+}

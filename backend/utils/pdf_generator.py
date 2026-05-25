@@ -129,6 +129,17 @@ def _preprocess_code(code: str) -> str:
     return code
 
 
+def _is_sql_code(code: str) -> bool:
+    """Detect if a code block contains SQL by checking for common SQL keywords."""
+    code_upper = code.upper()
+    sql_keywords = ["SELECT ", "CREATE TABLE", "INSERT INTO", "DROP TABLE",
+                    "ALTER TABLE", "DELETE FROM", "UPDATE ", "DELIMITER",
+                    "CREATE PROCEDURE", "CREATE FUNCTION", "CREATE TRIGGER",
+                    "CREATE VIEW"]
+    hits = sum(1 for kw in sql_keywords if kw in code_upper)
+    return hits >= 2  # at least 2 SQL keywords = likely SQL
+
+
 # ════════════════════════════════════════════════════════════════════
 #  Splittable Code Block — splits cleanly across page boundaries
 # ════════════════════════════════════════════════════════════════════
@@ -460,20 +471,26 @@ def _build_code_section(code_raw: str, content_width: float):
         rather than splitting the heading from the code.
       - For large code (> 1 page): KeepTogether's fallthrough lets the
         SplittableCodeBlock.split() handle the break at line boundaries.
+
+    Uses orange accent for SQL code blocks to visually distinguish them.
     """
     styles = _build_styles()
     code = _preprocess_code(code_raw)
 
+    # Detect SQL and use different accent color
+    is_sql = _is_sql_code(code)
+    border_color = "#e67e22" if is_sql else "#6c63ff"  # orange for SQL, purple for others
+
     heading_flowables = [
         Paragraph("SOURCE CODE", styles["SectionHead"]),
-        SectionAccentLine(content_width),
+        SectionAccentLine(content_width, color=border_color),
         Spacer(1, 8),
     ]
 
     code_block = SplittableCodeBlock(
         code, max_width=content_width, title="SOURCE CODE",
         font_name="Courier", font_size=8.5, leading=11.5, padding=10,
-        bg_color="#f4f4f8", border_color="#6c63ff",
+        bg_color="#f4f4f8", border_color=border_color,
     )
 
     # GROUP heading + code inside KeepTogether
@@ -543,7 +560,12 @@ def _build_output_section(output_raw: str, content_width: float):
 # ════════════════════════════════════════════════════════════════════
 
 def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
-    """Generate a professionally formatted, paginated PDF for a lab experiment."""
+    """Generate a professionally formatted, paginated PDF for a lab experiment.
+
+    Supports style-profile-aware section ordering. When a _style_profile is
+    present, the sections_order from the matching profile controls the layout
+    (e.g., MAIT DBMS puts OUTPUT before VIVA QUESTIONS).
+    """
     buffer = io.BytesIO()
 
     exp_no = experiment.get("experiment_no", "")
@@ -582,7 +604,7 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
     ))
     elements.append(KeepTogether(title_block))
 
-    # ── AIM (always short — keep with heading) ──
+    # ── AIM (always first — keep with heading) ──
     aim_text = experiment.get("aim", "").replace("\n", "<br/>")
     aim_block = [
         Paragraph("AIM", styles["SectionHead"]),
@@ -593,25 +615,70 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
     ]
     elements.append(KeepTogether(aim_block))
 
-    # ── THEORY ──
-    theory_raw = experiment.get("theory", "")
-    if theory_raw and theory_raw != "(Not included)":
-        elements.extend(_build_theory_section(theory_raw, styles, content_width))
+    # ── Determine section order ──
+    # Default: THEORY → SOURCE CODE → VIVA VOCE → OUTPUT
+    # Style profiles can override this (e.g., MAIT DBMS: THEORY → SOURCE CODE → OUTPUT → VIVA QUESTIONS)
+    default_order = ["THEORY", "SOURCE CODE", "VIVA VOCE", "OUTPUT"]
 
-    # ── SOURCE CODE ──
-    code_raw = experiment.get("source_code", "")
-    if code_raw and code_raw != "(Not included)":
-        elements.extend(_build_code_section(code_raw, content_width))
+    style_profile_name = experiment.get("_style_profile", "")
+    if style_profile_name:
+        try:
+            from services.syllabus_matcher import get_style_profile
+            profile = get_style_profile(style_profile_name)
+            profile_order = profile.get("sections_order", [])
+            if profile_order:
+                # Map profile section names to our internal names
+                name_map = {
+                    "AIM": None,  # AIM is always first, already added
+                    "THEORY": "THEORY",
+                    "SOURCE CODE": "SOURCE CODE",
+                    "OUTPUT": "OUTPUT",
+                    "VIVA QUESTIONS": "VIVA VOCE",
+                    "VIVA VOCE": "VIVA VOCE",
+                }
+                mapped = [name_map.get(s.upper(), s.upper()) for s in profile_order if name_map.get(s.upper()) is not None]
+                if mapped:
+                    default_order = mapped
+        except Exception:
+            pass  # fallback to default order silently
 
-    # ── VIVA VOCE ──
-    viva = experiment.get("viva", [])
-    if viva and not (len(viva) == 1 and viva[0].get("question") == "(Not included)"):
-        elements.extend(_build_viva_section(viva, styles, content_width))
+    # ── Build section content lazily ──
+    def _get_theory():
+        theory_raw = experiment.get("theory", "")
+        if theory_raw and theory_raw != "(Not included)":
+            return _build_theory_section(theory_raw, styles, content_width)
+        return []
 
-    # ── OUTPUT ──
-    output_raw = experiment.get("output", "")
-    if output_raw and output_raw != "(Not included)":
-        elements.extend(_build_output_section(output_raw, content_width))
+    def _get_code():
+        code_raw = experiment.get("source_code", "")
+        if code_raw and code_raw != "(Not included)":
+            return _build_code_section(code_raw, content_width)
+        return []
+
+    def _get_viva():
+        viva = experiment.get("viva", [])
+        if viva and not (len(viva) == 1 and viva[0].get("question") == "(Not included)"):
+            return _build_viva_section(viva, styles, content_width)
+        return []
+
+    def _get_output():
+        output_raw = experiment.get("output", "")
+        if output_raw and output_raw != "(Not included)":
+            return _build_output_section(output_raw, content_width)
+        return []
+
+    section_builders = {
+        "THEORY": _get_theory,
+        "SOURCE CODE": _get_code,
+        "VIVA VOCE": _get_viva,
+        "OUTPUT": _get_output,
+    }
+
+    # Add sections in the determined order
+    for section_name in default_order:
+        builder = section_builders.get(section_name)
+        if builder:
+            elements.extend(builder())
 
     # ── Build ──
     doc.build(elements, onFirstPage=page_callback, onLaterPages=page_callback)

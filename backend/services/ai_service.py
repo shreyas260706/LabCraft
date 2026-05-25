@@ -13,7 +13,7 @@ from google import genai
 from config import Config
 from flask import request
 from threading import Lock
-from services.syllabus_matcher import match_topic, build_context_injection
+from services.syllabus_matcher import match_topic, build_context_injection, get_style_profile
 
 
 # ─── Pydantic Schemas ───────────────────────────────────────────────
@@ -470,6 +470,50 @@ def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str =
     else:
         output_instructions = "- Provide realistic sample output of the program, including the student name and roll number output"
 
+    # ─── Style Profile Overrides ────────────────────────────────
+    # When a style profile is matched (e.g., MAIT DBMS), override
+    # default instructions with profile-specific formatting rules.
+    # This keeps generation dynamic while enforcing academic style.
+    style_profile_name = ""
+    style_profile = {}
+    if syllabus_match.matched and syllabus_match.style_profile:
+        style_profile = syllabus_match.style_profile
+        style_profile_name = syllabus_match.style_profile_name
+        print(f"[AI Service] STYLE PROFILE ACTIVE: '{style_profile_name}'")
+
+        # ── Override theory instructions with style rules ──
+        theory_rules = style_profile.get("theory_style", {}).get("rules", [])
+        if theory_rules and not options.get("compact"):
+            rules_text = "\n".join(f"- {r}" for r in theory_rules)
+            theory_instructions = f"""- MANDATORY THEORY FORMAT (follow EXACTLY):
+{rules_text}"""
+
+        # ── Override code instructions for SQL subjects ──
+        code_rules = style_profile.get("code_style", {}).get("rules", [])
+        if code_rules and not options.get("code_explanation"):
+            rules_text = "\n".join(f"- {r}" for r in code_rules)
+            code_instructions = f"""- SOURCE CODE FORMAT (follow EXACTLY):
+{rules_text}"""
+
+        # ── Override viva instructions with structured tiers ──
+        viva_style = style_profile.get("viva_style", {})
+        viva_rules = viva_style.get("rules", [])
+        if viva_rules and not options.get("extra_viva"):
+            basic = viva_style.get("basic_questions", 3)
+            intermediate = viva_style.get("intermediate_questions", 2)
+            technical = viva_style.get("technical_questions", 1)
+            total = basic + intermediate + technical
+            rules_text = "\n".join(f"- {r}" for r in viva_rules)
+            viva_instructions = f"""- Generate exactly {total} viva questions with answers
+{rules_text}"""
+
+        # ── Override output instructions ──
+        output_rules = style_profile.get("output_style", {}).get("rules", [])
+        if output_rules and not options.get("compact"):
+            rules_text = "\n".join(f"- {r}" for r in output_rules)
+            output_instructions = f"""- OUTPUT FORMAT (follow EXACTLY):
+{rules_text}"""
+
     # ─── Section inclusion control ──────────────────────────────
     # Default: all sections included (True)
     include_theory = options.get("include_theory", True)
@@ -569,6 +613,8 @@ STRICT RULES:
     if syllabus_match.matched:
         data["_syllabus_title"] = syllabus_match.experiment.get("title", "")
         data["_syllabus_category"] = syllabus_match.experiment.get("category", "")
+    if style_profile_name:
+        data["_style_profile"] = style_profile_name
 
     return data
 

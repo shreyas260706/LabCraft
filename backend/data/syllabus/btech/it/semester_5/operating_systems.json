@@ -1,0 +1,274 @@
+{
+  "subject": "Operating Systems",
+  "subject_aliases": ["OS", "operating system", "os lab"],
+  "experiments": [
+    {
+      "title": "FCFS Scheduling",
+      "keywords": ["fcfs", "first come first serve", "first come first served", "fifo scheduling", "implement fcfs", "fcfs scheduling"],
+      "theory_points": [
+        "FCFS is the simplest CPU scheduling algorithm",
+        "Processes are executed in order of arrival using a FIFO queue",
+        "Non-preemptive — once a process starts, it runs until completion",
+        "Can cause convoy effect where short processes wait behind long ones",
+        "Turnaround time = Completion time - Arrival time",
+        "Waiting time = Turnaround time - Burst time"
+      ],
+      "category": "CPU Scheduling",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "SJF Scheduling",
+      "keywords": ["sjf", "shortest job first", "shortest job next", "sjn"],
+      "theory_points": [
+        "SJF selects the process with the smallest burst time next",
+        "Can be preemptive (SRTF) or non-preemptive",
+        "Provides minimum average waiting time among non-preemptive algorithms",
+        "Requires knowledge of burst time in advance (prediction based)",
+        "May cause starvation of long processes"
+      ],
+      "category": "CPU Scheduling",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "Priority Scheduling",
+      "keywords": ["priority scheduling", "priority based scheduling", "priority cpu scheduling"],
+      "theory_points": [
+        "Each process is assigned a priority value",
+        "CPU is allocated to the process with highest priority",
+        "Can be preemptive or non-preemptive",
+        "Lower number may mean higher priority (system dependent)",
+        "Starvation possible — solved using aging technique"
+      ],
+      "category": "CPU Scheduling",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "Round Robin Scheduling",
+      "keywords": ["round robin", "rr scheduling", "time quantum", "time slice scheduling"],
+      "theory_points": [
+        "Preemptive version of FCFS with a fixed time quantum",
+        "Each process gets CPU for one time quantum, then moves to back of queue",
+        "Performance depends heavily on time quantum size",
+        "Large quantum behaves like FCFS; very small quantum causes high context switching",
+        "Fair allocation — every process gets equal CPU time"
+      ],
+      "category": "CPU Scheduling",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "Producer Consumer Problem",
+      "keywords": ["producer consumer", "bounded buffer", "producer-consumer", "bounded buffer problem"],
+      "theory_points": [
+        "Classic synchronization problem involving shared buffer",
+        "Producer generates data and places it in buffer",
+        "Consumer removes data from buffer for processing",
+        "Requires synchronization using semaphores or mutex",
+        "Uses three semaphores: mutex, full, empty",
+        "Demonstrates need for mutual exclusion and cooperation"
+      ],
+      "category": "Process Synchronization",
+      "output_type": "simulation",
+      "language": "C"
+    },
+    {
+      "title": "Dining Philosophers Problem",
+      "keywords": ["dining philosophers", "dining philosopher", "philosopher problem", "chopstick problem"],
+      "theory_points": [
+        "Five philosophers sit around a table with five chopsticks",
+        "Each philosopher needs two chopsticks to eat",
+        "Illustrates deadlock and resource allocation issues",
+        "Solutions include resource ordering, semaphores, or monitors",
+        "Demonstrates mutual exclusion and deadlock prevention"
+      ],
+      "category": "Process Synchronization",
+      "output_type": "simulation",
+      "language": "C"
+    },
+    {
+      "title": "Reader Writer Problem",
+      "keywords": ["reader writer", "readers writers", "reader-writer", "readers-writers problem"],
+      "theory_points": [
+        "Synchronization problem for shared database access",
+        "Multiple readers can read simultaneously",
+        "Writers need exclusive access — no other reader or writer allowed",
+        "Uses semaphores: mutex, wrt, and readcount variable",
+        "Variants: reader-priority, writer-priority, fair solution"
+      ],
+      "category": "Process Synchronization",
+      "output_type": "simulation",
+      "language": "C"
+    },
+    {
+      "title": "Bankers Algorithm",
+      "keywords": ["bankers algorithm", "banker's algorithm", "deadlock avoidance", "safe state", "safety algorithm"],
+      "theory_points": [
+        "Deadlock avoidance algorithm proposed by Dijkstra",
+        "Checks if resource allocation leaves system in safe state",
+        "Uses Available, Max, Allocation, and Need matrices",
+        "Safe state means a safe sequence exists for all processes",
+        "Denies requests that would lead to unsafe state"
+      ],
+      "category": "Deadlock",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "FIFO Page Replacement",
+      "keywords": ["fifo page replacement", "fifo page", "first in first out page replacement"],
+      "theory_points": [
+        "Simplest page replacement algorithm",
+        "Replaces the oldest page in memory (first loaded = first replaced)",
+        "Uses a FIFO queue to track page order",
+        "Suffers from Belady's anomaly — more frames can cause more faults",
+        "Easy to implement but not optimal"
+      ],
+      "category": "Memory Management",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "LRU Page Replacement",
+      "keywords": ["lru", "least recently used", "lru page replacement", "lru page"],
+      "theory_points": [
+        "Replaces the page that has not been used for the longest time",
+        "Based on locality of reference principle",
+        "Better performance than FIFO in most cases",
+        "Does not suffer from Belady's anomaly",
+        "Implementation methods: counters, stack, or reference bits"
+      ],
+      "category": "Memory Management",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "Optimal Page Replacement",
+      "keywords": ["optimal page replacement", "opt page", "optimal page", "belady optimal"],
+      "theory_points": [
+        "Replaces the page that will not be used for the longest time in future",
+        "Produces minimum number of page faults — theoretical best",
+        "Not implementable in practice (requires future knowledge)",
+        "Used as benchmark to compare other algorithms",
+        "Also known as Belady's Optimal algorithm"
+      ],
+      "category": "Memory Management",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "First Fit Memory Allocation",
+      "keywords": ["first fit", "first fit memory", "first fit allocation", "memory allocation first fit"],
+      "theory_points": [
+        "Allocates the first memory block that is large enough",
+        "Searches from the beginning of memory each time",
+        "Fast allocation — stops at first suitable block",
+        "Can cause external fragmentation over time",
+        "Simple to implement using linked list of free blocks"
+      ],
+      "category": "Memory Management",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "Best Fit Memory Allocation",
+      "keywords": ["best fit", "best fit memory", "best fit allocation"],
+      "theory_points": [
+        "Allocates the smallest block that is sufficient",
+        "Searches entire list to find closest size match",
+        "Minimizes wasted space in allocated block",
+        "Slower than first fit due to full list scan",
+        "Can create many small unusable fragments"
+      ],
+      "category": "Memory Management",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "Worst Fit Memory Allocation",
+      "keywords": ["worst fit", "worst fit memory", "worst fit allocation"],
+      "theory_points": [
+        "Allocates the largest available memory block",
+        "Idea: leftover fragment will be large enough for future use",
+        "Searches entire free list for maximum size block",
+        "Tends to break large blocks, reducing future flexibility",
+        "Generally poorest performance among the three strategies"
+      ],
+      "category": "Memory Management",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "FCFS Disk Scheduling",
+      "keywords": ["fcfs disk", "fcfs disk scheduling", "disk scheduling fcfs"],
+      "theory_points": [
+        "Services disk I/O requests in order they arrive",
+        "Simple and fair but not optimal",
+        "Can result in large total head movement",
+        "No starvation — every request is served",
+        "Used as baseline to compare other disk algorithms"
+      ],
+      "category": "Disk Scheduling",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "SSTF Disk Scheduling",
+      "keywords": ["sstf", "shortest seek time first", "sstf disk scheduling"],
+      "theory_points": [
+        "Selects the request closest to current head position",
+        "Reduces total seek time compared to FCFS",
+        "May cause starvation of distant requests",
+        "Similar concept to SJF in CPU scheduling",
+        "Not optimal but significantly better than FCFS"
+      ],
+      "category": "Disk Scheduling",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "SCAN Disk Scheduling",
+      "keywords": ["scan", "scan disk", "elevator algorithm", "scan disk scheduling"],
+      "theory_points": [
+        "Head moves in one direction servicing all requests, then reverses",
+        "Also known as Elevator Algorithm",
+        "Provides more uniform wait times than SSTF",
+        "No starvation — all requests eventually served",
+        "Variant: C-SCAN (Circular SCAN) for more uniform response"
+      ],
+      "category": "Disk Scheduling",
+      "output_type": "table",
+      "language": "C"
+    },
+    {
+      "title": "Fork System Call",
+      "keywords": ["fork", "fork system call", "process creation", "fork exec", "fork()"],
+      "theory_points": [
+        "fork() creates a new child process as copy of parent",
+        "Returns 0 to child, child PID to parent, -1 on failure",
+        "Child gets copy of parent's address space",
+        "Both processes execute concurrently after fork",
+        "Used with exec() to run different programs in child"
+      ],
+      "category": "System Calls",
+      "output_type": "console",
+      "language": "C"
+    },
+    {
+      "title": "Inter Process Communication",
+      "keywords": ["ipc", "inter process communication", "pipe", "shared memory", "message passing", "message queue"],
+      "theory_points": [
+        "IPC allows processes to communicate and synchronize",
+        "Methods: pipes, shared memory, message queues, signals",
+        "Pipes provide unidirectional data flow between processes",
+        "Shared memory is fastest IPC — processes access same memory region",
+        "Message queues allow structured message exchange"
+      ],
+      "category": "System Calls",
+      "output_type": "console",
+      "language": "C"
+    }
+  ]
+}

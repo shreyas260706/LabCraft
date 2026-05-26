@@ -136,12 +136,12 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
 
     try {
       if (isExperiment) {
-        const data = await generateExperiment(config.subject, config.experimentNo, config.topic, config.options || {}, forceRefresh);
+        const data = await generateExperiment(config.subject, config.experimentNo, config.topic, config.options || {}, forceRefresh, config.studentDetails || null);
         setExperimentData(data);
         localCache.set(config.subject, config.topic, config.options || {}, data);
         if (!isBackgroundRefresh) onSaveHistory?.(config, data);
       } else {
-        const data = await generatePPT(config.subject, config.topic, config.options || {}, forceRefresh);
+        const data = await generatePPT(config.subject, config.topic, config.options || {}, forceRefresh, config.studentDetails || null);
         setPptData(data);
         localCache.setPPT(config.subject, config.topic, data);
         if (!isBackgroundRefresh) onSaveHistory?.(config, data);
@@ -201,7 +201,7 @@ function ResultPage({ config, experimentData, setExperimentData, pptData, setPpt
     setDownloading(format);
     try {
       if (isExperiment) {
-        await downloadExperiment(experimentData, format);
+        await downloadExperiment(experimentData, format, config.studentDetails || null);
       } else {
         await downloadPPT(pptData);
       }

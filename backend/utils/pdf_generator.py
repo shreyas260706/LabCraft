@@ -627,6 +627,17 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
         Paragraph(f"<b>DATE:</b> {date_str}", styles["MetaText"])
     )
 
+    # Student details (when provided)
+    student_details = experiment.get("_student_details")
+    if student_details and student_details.get("name"):
+        title_block.append(
+            Paragraph(f"<b>NAME:</b> {student_details['name']}", styles["MetaText"])
+        )
+        if student_details.get("rollNumber"):
+            title_block.append(
+                Paragraph(f"<b>ROLL NO:</b> {student_details['rollNumber']}", styles["MetaText"])
+            )
+
     title_block.append(HRFlowable(
         width="100%", thickness=2,
         color=colors.HexColor("#0f3460"),

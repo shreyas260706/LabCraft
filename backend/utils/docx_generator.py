@@ -66,6 +66,19 @@ def generate_experiment_docx(experiment: dict) -> io.BytesIO:
     date_run.font.bold = True
     date_run.font.size = Pt(11)
 
+    # Student details (when provided)
+    student_details = experiment.get("_student_details")
+    if student_details and student_details.get("name"):
+        name_p = doc.add_paragraph()
+        name_run = name_p.add_run(f"NAME: {student_details['name']}")
+        name_run.font.bold = True
+        name_run.font.size = Pt(11)
+        if student_details.get("rollNumber"):
+            roll_p = doc.add_paragraph()
+            roll_run = roll_p.add_run(f"ROLL NO: {student_details['rollNumber']}")
+            roll_run.font.bold = True
+            roll_run.font.size = Pt(11)
+
     def add_section(name, content, is_code=False):
         h = doc.add_heading(name, level=1)
         for run in h.runs:

@@ -760,3 +760,74 @@ a:hover { color: var(--accent); }
 .regen-content-reveal .slide-card:nth-child(4) { animation-delay: 180ms; }
 .regen-content-reveal .section-card:nth-child(5),
 .regen-content-reveal .slide-card:nth-child(5) { animation-delay: 240ms; }
+
+/* ─── Student Details Card ─────────────────────────────────── */
+.student-details-card {
+  margin-top: 16px;
+  padding: 4px;
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  border-radius: var(--radius-lg);
+  background: rgba(124, 58, 237, 0.03);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.student-details-card:has(.toggle-item.active) {
+  border-color: rgba(124, 58, 237, 0.3);
+  background: rgba(124, 58, 237, 0.06);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.08);
+}
+
+.student-inputs {
+  padding: 12px 16px 16px;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.student-inputs .form-row {
+  margin-bottom: 10px;
+}
+
+.remember-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  user-select: none;
+  padding: 4px 0;
+  transition: color var(--duration-fast) ease;
+}
+
+.remember-checkbox:hover {
+  color: var(--text-primary);
+}
+
+.remember-checkbox input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.6);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: all var(--duration-fast) ease;
+}
+
+.remember-checkbox input[type="checkbox"]:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.remember-checkbox input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+}

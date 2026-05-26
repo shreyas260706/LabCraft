@@ -126,13 +126,14 @@ export const getCourses = async () => {
 };
 
 // ─── Experiment ────────────────────────────────────────────
-export const generateExperiment = async (subject, experimentNo, topic, options = {}, forceRefresh = false) => {
+export const generateExperiment = async (subject, experimentNo, topic, options = {}, forceRefresh = false, studentDetails = null) => {
   const { data } = await api.post('/generate-experiment', {
     subject,
     experiment_no: experimentNo,
     topic,
     options,
     force_refresh: forceRefresh,
+    student_details: studentDetails,
   });
   return data;
 };
@@ -147,20 +148,21 @@ export const modifySection = async (experiment, section, instruction) => {
 };
 
 // ─── PPT ───────────────────────────────────────────────────
-export const generatePPT = async (subject, topic, options = {}, forceRefresh = false) => {
+export const generatePPT = async (subject, topic, options = {}, forceRefresh = false, studentDetails = null) => {
   const { data } = await api.post('/generate-ppt', { 
     subject, 
     topic, 
     options,
     force_refresh: forceRefresh,
+    student_details: studentDetails,
   });
   return data;
 };
 
 // ─── Downloads ─────────────────────────────────────────────
-export const downloadExperiment = async (experiment, format) => {
+export const downloadExperiment = async (experiment, format, studentDetails = null) => {
   const response = await api.post('/download-experiment',
-    { experiment, format },
+    { experiment, format, student_details: studentDetails },
     { responseType: 'blob' }
   );
 

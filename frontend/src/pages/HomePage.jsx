@@ -45,6 +45,32 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
   });
   const [activePreset, setActivePreset] = useState(null);
 
+  // Student details (global across all subjects)
+  const [studentDetails, setStudentDetails] = useState({
+    enabled: false,
+    name: '',
+    rollNumber: '',
+    remember: false,
+  });
+
+  // Load remembered student details on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('labcraft_student');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.name) {
+          setStudentDetails({
+            enabled: true,
+            name: parsed.name || '',
+            rollNumber: parsed.rollNumber || '',
+            remember: true,
+          });
+        }
+      }
+    } catch { /* ignore corrupted data */ }
+  }, []);
+
   // Derived data
   const course = coursesData?.courses?.find(c => c.name === selectedCourse);
   const branches = course?.branches || [];
@@ -108,6 +134,19 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
 
   const handleSubmit = () => {
     if (!canGenerate) return;
+
+    // Persist student details if remember is checked
+    if (studentDetails.enabled && studentDetails.remember && studentDetails.name) {
+      try {
+        localStorage.setItem('labcraft_student', JSON.stringify({
+          name: studentDetails.name,
+          rollNumber: studentDetails.rollNumber,
+        }));
+      } catch { /* storage full */ }
+    } else if (!studentDetails.remember) {
+      try { localStorage.removeItem('labcraft_student'); } catch {}
+    }
+
     onGenerate({
       course: selectedCourse,
       semester: selectedSemester,
@@ -116,6 +155,9 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
       experimentNo: mode === 'experiment' ? parseInt(experimentNo) : null,
       topic: topic.trim(),
       options: mode === 'experiment' ? { ...options } : {},
+      studentDetails: studentDetails.enabled && studentDetails.name
+        ? { name: studentDetails.name, rollNumber: studentDetails.rollNumber }
+        : null,
     });
   };
 
@@ -657,6 +699,60 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Student Details (global — works for all modes) */}
+          {mode && (
+            <div className="student-details-card">
+              <div
+                className={`toggle-item ${studentDetails.enabled ? 'active' : ''}`}
+                onClick={() => setStudentDetails(prev => ({
+                  ...prev,
+                  enabled: !prev.enabled,
+                }))}
+              >
+                <span className="toggle-icon">🎓</span>
+                <span className="toggle-label">Include Student Details</span>
+                <div className={`toggle-switch ${studentDetails.enabled ? 'on' : ''}`}>
+                  <div className="toggle-knob" />
+                </div>
+              </div>
+
+              {studentDetails.enabled && (
+                <div className="student-inputs">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="label">Student Name</label>
+                      <input
+                        type="text"
+                        className="input"
+                        placeholder="e.g. Shreyas Harsh"
+                        value={studentDetails.name}
+                        onChange={(e) => setStudentDetails(prev => ({ ...prev, name: e.target.value }))}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="label">Roll Number</label>
+                      <input
+                        type="text"
+                        className="input"
+                        placeholder="e.g. 05290302023"
+                        value={studentDetails.rollNumber}
+                        onChange={(e) => setStudentDetails(prev => ({ ...prev, rollNumber: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <label className="remember-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={studentDetails.remember}
+                      onChange={(e) => setStudentDetails(prev => ({ ...prev, remember: e.target.checked }))}
+                    />
+                    <span>Remember my details</span>
+                  </label>
+                </div>
+              )}
             </div>
           )}
 

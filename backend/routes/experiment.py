@@ -33,6 +33,7 @@ def generate_experiment_route():
     topic = data.get("topic")
     aim = data.get("aim")  # Optional
     options = data.get("options", {})  # Generation toggles
+    student_details = data.get("student_details")  # { name, rollNumber } or None
 
     if not all([subject, experiment_no, topic]):
         return jsonify({"error": "subject, experiment_no, and topic are required"}), 400
@@ -52,7 +53,7 @@ def generate_experiment_route():
             return jsonify({"error": limit_error}), 429
 
     try:
-        result = generate_experiment(subject, experiment_no, topic, aim, options, force_refresh)
+        result = generate_experiment(subject, experiment_no, topic, aim, options, force_refresh, student_details)
 
         # Only count towards limit if it was an actual API call (not a cache hit)
         if not result.get("_cached", False):

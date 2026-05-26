@@ -18,9 +18,14 @@ def download_experiment():
 
     experiment = data.get("experiment")
     fmt = data.get("format", "pdf").lower()
+    student_details = data.get("student_details")  # { name, rollNumber } or None
 
     if not experiment:
         return jsonify({"error": "experiment data is required"}), 400
+
+    # Inject student details for PDF/DOCX rendering
+    if student_details:
+        experiment["_student_details"] = student_details
 
     exp_no = experiment.get("experiment_no", "0")
 

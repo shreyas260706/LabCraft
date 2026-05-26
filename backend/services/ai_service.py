@@ -346,7 +346,7 @@ def _generate_with_retry(prompt: str, schema, max_retries: int = None):
 
 # ─── Public API ─────────────────────────────────────────────────────
 
-def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str = None, options: dict = None, force_refresh: bool = False) -> dict:
+def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str = None, options: dict = None, force_refresh: bool = False, student_details: dict = None) -> dict:
     """Generate a complete lab experiment with strict formatting."""
 
     if not subject or not topic:
@@ -456,21 +456,38 @@ def generate_experiment(subject: str, experiment_no: int, topic: str, aim: str =
 - Do NOT include comments inside the code itself
 - After the complete code block, add a section called "CODE EXPLANATION:"
   that explains the logic step by step in 5-8 bullet points
-- Code must be submission-ready
-- MUST include a print statement at the end that outputs the student's name and roll number"""
+- Code must be submission-ready"""
     else:
         code_instructions = """- Clean and minimal code
 - Proper indentation
 - Include necessary headers only
 - Do NOT include comments (no // or /* */)
 - Do NOT add explanations inside code
-- Code must be submission-ready
-- MUST include a print statement at the end that outputs the student's name and roll number"""
+- Code must be submission-ready"""
 
     if options.get("compact"):
         output_instructions = "- Provide brief, minimal sample output (2-3 lines)"
     else:
-        output_instructions = "- Provide realistic sample output of the program, including the student name and roll number output"
+        output_instructions = "- Provide realistic sample output of the program"
+
+    # ─── Student Identity Injection ─────────────────────────────
+    # Dynamically controls whether AI uses real student details
+    # or avoids generating fake placeholder identities.
+    student_instruction = ""
+    if student_details and student_details.get("name"):
+        sname = student_details["name"]
+        sroll = student_details.get("rollNumber", "")
+        student_instruction = f"""\nSTUDENT DETAILS (use these where appropriate):
+- Student Name: {sname}
+- Roll Number: {sroll}
+- Use these EXACT details in any print statements, output headers, or metadata
+- Do NOT invent or use any other name or roll number"""
+    else:
+        student_instruction = """\nSTUDENT IDENTITY RULES:
+- Do NOT include any student name or roll number anywhere in the experiment
+- Do NOT generate fake names like "John Doe" or placeholder roll numbers like "2023CSB007"
+- Output should contain only program results, no identity metadata
+- Code should NOT have any print statement for student name or roll number"""
 
     # ─── Syllabus-Aware Context Enhancement ─────────────────
     syllabus_context = ""
@@ -575,6 +592,8 @@ STRUCTURE (MUST FOLLOW EXACTLY):
 
 {output_block}
 
+{student_instruction}
+
 STRICT RULES:
 - Do NOT change section order
 - Do NOT skip any section
@@ -617,6 +636,8 @@ STRICT RULES:
         data["_syllabus_category"] = syllabus_match.experiment.get("category", "")
     if style_profile_name:
         data["_style_profile"] = style_profile_name
+    if student_details and student_details.get("name"):
+        data["_student_details"] = student_details
 
     return data
 

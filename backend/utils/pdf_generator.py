@@ -99,7 +99,7 @@ def _reformat_single_line_code(code: str) -> str:
     return "\n".join(cleaned)
 
 
-def _wrap_long_lines(code: str, max_chars: int = 78) -> str:
+def _wrap_long_lines(code: str, max_chars: int = 90) -> str:
     """Wrap lines that exceed max_chars to prevent overflow beyond page margins."""
     lines = code.split("\n")
     wrapped = []
@@ -132,7 +132,7 @@ def _preprocess_code(code: str) -> str:
     """Full pipeline: strip fences → reformat single-line → wrap long lines."""
     code = _strip_code_fences(code)
     code = _reformat_single_line_code(code)
-    code = _wrap_long_lines(code, max_chars=78)
+    code = _wrap_long_lines(code, max_chars=90)
     return code
 
 
@@ -167,8 +167,8 @@ class SplittableCodeBlock(Flowable):
     MIN_LINES_REMAINDER = 4
 
     def __init__(self, code_text, max_width, title="SOURCE CODE",
-                 font_name="Courier", font_size=8.5, leading=11.5,
-                 padding=10, bg_color="#f4f4f8", border_color="#6c63ff",
+                 font_name="Courier", font_size=8, leading=10.8,
+                 padding=8, bg_color="#f4f4f8", border_color="#6c63ff",
                  is_continuation=False):
         super().__init__()
         self.code_text = code_text
@@ -319,13 +319,13 @@ def _make_page_callback(exp_no, subject):
         canvas.setFillColor(colors.HexColor("#94a3b8"))
         left_text = f"Experiment {exp_no}"
         right_text = subject or ""
-        canvas.drawString(25 * mm, page_h - 14 * mm, left_text)
-        canvas.drawRightString(page_w - 25 * mm, page_h - 14 * mm, right_text)
+        canvas.drawString(18 * mm, page_h - 14 * mm, left_text)
+        canvas.drawRightString(page_w - 18 * mm, page_h - 14 * mm, right_text)
 
         # Thin header line
         canvas.setStrokeColor(colors.HexColor("#e2e8f0"))
         canvas.setLineWidth(0.5)
-        canvas.line(25 * mm, page_h - 16 * mm, page_w - 25 * mm, page_h - 16 * mm)
+        canvas.line(18 * mm, page_h - 16 * mm, page_w - 18 * mm, page_h - 16 * mm)
 
         # ── Footer ──
         canvas.setFont("Helvetica", 8)
@@ -469,7 +469,7 @@ def _build_theory_section(theory_raw: str, styles, content_width: float):
     return [KeepTogether(heading + body)]
 
 
-def _build_code_section(code_raw: str, content_width: float):
+def _build_code_section(code_raw: str, content_width: float, wide_content_width: float = None):
     """
     Build the SOURCE CODE section.
 
@@ -480,9 +480,13 @@ def _build_code_section(code_raw: str, content_width: float):
         SplittableCodeBlock.split() handle the break at line boundaries.
 
     Uses orange accent for SQL code blocks to visually distinguish them.
+    Uses a wider content area (narrower margins) for better code readability.
     """
     styles = _build_styles()
     code = _preprocess_code(code_raw)
+
+    # Use wider area for code sections
+    effective_width = wide_content_width or content_width
 
     # Detect SQL and use different accent color
     is_sql = _is_sql_code(code)
@@ -490,13 +494,13 @@ def _build_code_section(code_raw: str, content_width: float):
 
     heading_flowables = [
         Paragraph("SOURCE CODE", styles["SectionHead"]),
-        SectionAccentLine(content_width, color=border_color),
-        Spacer(1, 8),
+        SectionAccentLine(effective_width, color=border_color),
+        Spacer(1, 6),
     ]
 
     code_block = SplittableCodeBlock(
-        code, max_width=content_width, title="SOURCE CODE",
-        font_name="Courier", font_size=8.5, leading=11.5, padding=10,
+        code, max_width=effective_width, title="SOURCE CODE",
+        font_name="Courier", font_size=8, leading=10.8, padding=8,
         bg_color="#f4f4f8", border_color=border_color,
     )
 
@@ -535,27 +539,31 @@ def _build_viva_section(viva_list: list, styles, content_width: float):
         return [KeepTogether(heading)] + [Spacer(1, 8)]
 
 
-def _build_output_section(output_raw: str, content_width: float):
+def _build_output_section(output_raw: str, content_width: float, wide_content_width: float = None):
     """
     Build OUTPUT section.
 
     Heading + output block are grouped in KeepTogether to prevent
     heading/content separation.
+    Uses a wider content area for better table/terminal output alignment.
     """
     styles = _build_styles()
     output = _strip_code_fences(output_raw)
-    output = _wrap_long_lines(output, max_chars=78)
+    output = _wrap_long_lines(output, max_chars=90)
+
+    # Use wider area for output sections
+    effective_width = wide_content_width or content_width
 
     heading_flowables = [
         Paragraph("OUTPUT", styles["SectionHead"]),
-        SectionAccentLine(content_width),
-        Spacer(1, 8),
+        SectionAccentLine(effective_width),
+        Spacer(1, 6),
     ]
 
     output_block = SplittableCodeBlock(
-        output, max_width=content_width, title="OUTPUT",
-        font_name="Courier", font_size=8.5, leading=11.5, padding=10,
-        bg_color="#f4f4f8", border_color="#10b981",
+        output, max_width=effective_width, title="OUTPUT",
+        font_name="Courier", font_size=8, leading=10.8, padding=8,
+        bg_color="#f0fdf4", border_color="#10b981",
     )
 
     # GROUP heading + output block together
@@ -593,13 +601,16 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        rightMargin=25 * mm,
-        leftMargin=25 * mm,
+        rightMargin=18 * mm,
+        leftMargin=18 * mm,
         topMargin=22 * mm,
         bottomMargin=18 * mm,
     )
 
+    # Standard content width (used for AIM, THEORY, VIVA — academic readability)
     content_width = A4[0] - 50 * mm
+    # Wide content width (used for SOURCE CODE and OUTPUT — maximises usable space)
+    wide_content_width = A4[0] - 36 * mm
     styles = _build_styles()
     page_callback = _make_page_callback(exp_no, subject)
 
@@ -671,7 +682,7 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
     def _get_code():
         code_raw = experiment.get("source_code", "")
         if code_raw and code_raw != "(Not included)":
-            return _build_code_section(code_raw, content_width)
+            return _build_code_section(code_raw, content_width, wide_content_width)
         return []
 
     def _get_viva():
@@ -683,7 +694,7 @@ def generate_experiment_pdf(experiment: dict) -> io.BytesIO:
     def _get_output():
         output_raw = experiment.get("output", "")
         if output_raw and output_raw != "(Not included)":
-            return _build_output_section(output_raw, content_width)
+            return _build_output_section(output_raw, content_width, wide_content_width)
         return []
 
     section_builders = {

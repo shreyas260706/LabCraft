@@ -1,0 +1,112 @@
+import { useEffect, useRef } from 'react';
+import { useLocation, useNavigate, Navigate } from 'react-router-dom';
+import GenerationLoadingView from '../components/GenerationLoadingView';
+import { generateExperiment, generatePPT } from '../services/api';
+import { useSEO } from '../hooks/useSEO';
+
+const HISTORY_KEY = 'labcraft_history';
+const MAX_HISTORY = 10;
+
+function GeneratingPage() {
+  useSEO({
+    title: 'Generating... | LabCraft',
+    description: 'AI is generating your document.',
+    url: '/generating',
+  });
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const config = location.state?.config;
+  const hasStarted = useRef(false);
+
+  useEffect(() => {
+    if (!config || hasStarted.current) return;
+    hasStarted.current = true;
+
+    let isMounted = true;
+
+    const startGeneration = async () => {
+      try {
+        const isExperiment = config.mode === 'experiment';
+        let data;
+
+        if (isExperiment) {
+          data = await generateExperiment(
+            config.subject,
+            config.experimentNo,
+            config.topic,
+            config.options || {},
+            false,
+            config.studentDetails || null
+          );
+        } else {
+          data = await generatePPT(
+            config.subject,
+            config.topic,
+            config.options || {},
+            false,
+            config.studentDetails || null
+          );
+        }
+
+        if (!isMounted) return;
+
+        // Save to history
+        const entryId = Date.now().toString();
+        const entry = {
+          id: entryId,
+          subject: config.subject,
+          topic: config.topic,
+          experimentNo: config.experimentNo,
+          course: config.course,
+          mode: config.mode,
+          timestamp: new Date().toISOString(),
+          config, // save full config for regenerations
+          data,
+        };
+
+        try {
+          const stored = localStorage.getItem(HISTORY_KEY);
+          const history = stored ? JSON.parse(stored) : [];
+          // Remove duplicates
+          const filtered = history.filter(
+            h => !(h.subject === entry.subject && h.topic === entry.topic && h.mode === entry.mode)
+          );
+          const updated = [entry, ...filtered].slice(0, MAX_HISTORY);
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+        } catch {}
+
+        // Small delay so the "almost there" animation finishes if it was super fast
+        setTimeout(() => {
+          if (isMounted) navigate(`/result/${entryId}`);
+        }, 800);
+
+      } catch (err) {
+        if (!isMounted) return;
+        // If it fails, navigate back to the generator with an error state
+        console.error("Generation failed:", err);
+        navigate(config.mode === 'experiment' ? '/lab-generator' : '/ppt-generator', { 
+          state: { error: 'Generation failed. Please try again.' },
+          replace: true 
+        });
+      }
+    };
+
+    startGeneration();
+
+    return () => { isMounted = false; };
+  }, [config, navigate]);
+
+  // If directly navigated here without config in state, redirect to home
+  if (!config) {
+    return <Navigate to="/" replace />;
+  }
+
+  return (
+    <div className="home-page" style={{ minHeight: 'calc(100vh - 70px)' }}>
+      <GenerationLoadingView isExperiment={config.mode === 'experiment'} />
+    </div>
+  );
+}
+
+export default GeneratingPage;

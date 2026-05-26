@@ -2,10 +2,12 @@
  * Navbar — Premium top navigation bar with branding
  */
 
-function Navbar({ onLogoClick }) {
+import { Link } from 'react-router-dom';
+
+function Navbar() {
   return (
     <nav className="navbar" id="navbar">
-      <div className="navbar-brand" onClick={onLogoClick}>
+      <Link to="/" className="navbar-brand" style={{ textDecoration: 'none' }}>
         {/* Inline SVG logo icon */}
         <div className="navbar-logo-container">
           <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,7 +32,7 @@ function Navbar({ onLogoClick }) {
           <span className="navbar-title-lab">Lab</span>
           <span className="navbar-title-craft">Craft</span>
         </span>
-      </div>
+      </Link>
       <div className="navbar-right">
         <div className="navbar-status">
           <span className="navbar-status-dot"></span>

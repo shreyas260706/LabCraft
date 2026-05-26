@@ -727,7 +727,7 @@ function HomePage({ onGenerate, history = [], onLoadHistory, onClearHistory }) {
                       <input
                         type="text"
                         className="input"
-                        placeholder="e.g. Shreyas Harsh"
+                        placeholder="e.g. Rahul Sharma"
                         value={studentDetails.name}
                         onChange={(e) => setStudentDetails(prev => ({ ...prev, name: e.target.value }))}
                       />

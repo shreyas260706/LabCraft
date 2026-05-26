@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import GenerationLoadingView from '../components/GenerationLoadingView';
 import { generateExperiment, generatePPT } from '../services/api';
@@ -18,6 +18,28 @@ function GeneratingPage() {
   const navigate = useNavigate();
   const config = location.state?.config;
   const hasStarted = useRef(false);
+  
+  // Timer state
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [isSlow, setIsSlow] = useState(false);
+  const [showRetry, setShowRetry] = useState(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    // Start timer
+    timerRef.current = setInterval(() => {
+      setElapsedMs(prev => {
+        const next = prev + 200;
+        if (next >= 30000) setIsSlow(true); // 30s
+        if (next >= 90000) setShowRetry(true); // 90s
+        return next;
+      });
+    }, 200);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!config || hasStarted.current) return;
@@ -104,7 +126,19 @@ function GeneratingPage() {
 
   return (
     <div className="home-page" style={{ minHeight: 'calc(100vh - 70px)' }}>
-      <GenerationLoadingView isExperiment={config.mode === 'experiment'} />
+      <GenerationLoadingView 
+        isExperiment={config.mode === 'experiment'} 
+        elapsedMs={elapsedMs}
+        isSlow={isSlow}
+      />
+      {showRetry && (
+        <div className="gen-retry-bar">
+          <span>This is taking longer than expected.</span>
+          <button className="btn btn-ghost btn-sm" onClick={() => window.location.reload()}>
+            Refresh Page
+          </button>
+        </div>
+      )}
     </div>
   );
 }

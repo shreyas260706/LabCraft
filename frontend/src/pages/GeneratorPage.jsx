@@ -4,6 +4,7 @@ import { getCourses } from '../services/api';
 import { useSEO } from '../hooks/useSEO';
 
 const STORAGE_KEY = 'labcraft_generator_draft';
+const HISTORY_KEY = 'labcraft_history';
 
 function GeneratorPage({ defaultMode = 'experiment' }) {
   useSEO({
@@ -46,6 +47,8 @@ function GeneratorPage({ defaultMode = 'experiment' }) {
     rollNumber: '',
     remember: false,
   });
+
+  const [history, setHistory] = useState([]);
 
   // Keep mode in sync with route if it changes
   useEffect(() => {
@@ -93,6 +96,12 @@ function GeneratorPage({ defaultMode = 'experiment' }) {
         }
       }
     } catch {}
+
+    // 3. Load history from localStorage
+    try {
+      const storedHistory = localStorage.getItem(HISTORY_KEY);
+      if (storedHistory) setHistory(JSON.parse(storedHistory));
+    } catch {}
   }, []);
 
   // Save draft state to sessionStorage whenever it changes
@@ -125,6 +134,29 @@ function GeneratorPage({ defaultMode = 'experiment' }) {
   const subjects = semester?.subjects || [];
 
   const step = selectedSubject ? 3 : (selectedCourse ? 1 : 0);
+
+  const clearHistory = () => {
+    setHistory([]);
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify([]));
+    } catch {}
+  };
+
+  const handleLoadHistory = (entry) => {
+    navigate(`/result/${entry.id}`);
+  };
+
+  // Time-ago formatter
+  const timeAgo = (isoStr) => {
+    const diff = Date.now() - new Date(isoStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  };
 
   const handleCourseChange = (val) => {
     setSelectedCourse(val);
@@ -436,6 +468,34 @@ function GeneratorPage({ defaultMode = 'experiment' }) {
           )}
         </div>
       </div>
+
+      {/* ─── Recent History ──────────────────────────────────── */}
+      {history.length > 0 && (
+        <div className="history-section slide-up" style={{ marginTop: '48px', maxWidth: '900px', margin: '48px auto 0' }}>
+          <div className="history-header">
+            <h3 className="history-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Recent Work
+            </h3>
+            <button className="btn btn-ghost btn-sm" onClick={clearHistory}>Clear All</button>
+          </div>
+          <div className="history-list">
+            {history.map((entry) => (
+              <div key={entry.id} className="history-item" onClick={() => handleLoadHistory(entry)}>
+                <div className="history-item-icon">{entry.mode === 'experiment' ? '🧪' : '📊'}</div>
+                <div className="history-item-info">
+                  <span className="history-item-topic">{entry.topic}</span>
+                  <span className="history-item-meta">
+                    {entry.subject}
+                    {entry.experimentNo ? ` • Exp ${entry.experimentNo}` : ''}
+                  </span>
+                </div>
+                <span className="history-item-time">{timeAgo(entry.timestamp)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

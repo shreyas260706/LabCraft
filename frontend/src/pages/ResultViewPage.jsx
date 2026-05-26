@@ -44,6 +44,20 @@ function ResultViewPage() {
 
   const isExperiment = config?.mode === 'experiment';
 
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      // If they navigated here from within the app, native back works best 
+      // (preserves the exact page they came from, including scroll position)
+      navigate(-1);
+    } else if (config?.mode === 'experiment') {
+      navigate('/lab-generator');
+    } else if (config?.mode === 'ppt') {
+      navigate('/ppt-generator');
+    } else {
+      navigate('/');
+    }
+  };
+
   useSEO({
     title: config ? `${isExperiment ? 'Experiment' : 'PPT'} Result | LabCraft` : 'Result | LabCraft',
     description: 'View and edit your generated lab document.',
@@ -260,7 +274,7 @@ function ResultViewPage() {
     return (
       <div className="result-page">
         <div className="result-header" style={{ maxWidth: 900, margin: '0 auto' }}>
-          <button className="back-button" onClick={() => navigate('/')}>← Back to Home</button>
+          <button className="back-button" onClick={handleBack}>← Back</button>
         </div>
         <div className="error-state-card">
           <div className="error-state-icon">⚠️</div>
@@ -280,7 +294,7 @@ function ResultViewPage() {
         {isRegenerating && <RegenerationOverlay isExperiment={true} success={regenSuccess} />}
 
         <div className="result-header">
-          <button className="back-button" onClick={() => navigate('/')}>← Back to Home</button>
+          <button className="back-button" onClick={handleBack}>← Back</button>
           <div className="result-meta">
             <h2>Experiment {experimentData.experiment_no || config.experimentNo}</h2>
             <p>{config.subject} • {config.course}</p>
@@ -384,7 +398,7 @@ function ResultViewPage() {
         {isRegenerating && <RegenerationOverlay isExperiment={false} success={regenSuccess} />}
 
         <div className="result-header">
-          <button className="back-button" onClick={() => navigate('/')}>← Back to Home</button>
+          <button className="back-button" onClick={handleBack}>← Back</button>
           <div className="result-meta">
             <h2>{pptData.title}</h2>
             <p>{config.subject} • {pptData.slides?.length || 0} slides</p>

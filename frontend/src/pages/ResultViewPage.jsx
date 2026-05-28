@@ -70,7 +70,7 @@ function ResultViewPage() {
       const stored = localStorage.getItem(HISTORY_KEY);
       if (stored) {
         const history = JSON.parse(stored);
-        const match = history.find(h => h.id === id);
+        const match = history.find(h => String(h.id) === String(id));
         if (match) {
           setEntry(match);
           setConfig(match.config);

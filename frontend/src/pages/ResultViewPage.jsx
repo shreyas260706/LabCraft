@@ -73,8 +73,21 @@ function ResultViewPage() {
         const match = history.find(h => String(h.id) === String(id));
         if (match) {
           setEntry(match);
-          setConfig(match.config);
-          if (match.mode === 'experiment') {
+
+          // Reconstruct config from entry fields if config wasn't saved (older entries)
+          const resolvedConfig = match.config || {
+            subject: match.subject,
+            topic: match.topic,
+            experimentNo: match.experimentNo,
+            course: match.course,
+            mode: match.mode,
+            options: {},
+            studentDetails: null,
+          };
+          setConfig(resolvedConfig);
+
+          const mode = resolvedConfig.mode || match.mode;
+          if (mode === 'experiment') {
             setExperimentData(match.data);
             setPptData(null);
           } else {

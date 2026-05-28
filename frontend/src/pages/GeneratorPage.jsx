@@ -264,6 +264,19 @@ function GeneratorPage({ defaultMode = 'experiment' }) {
   ];
 
   const applyPreset = (preset) => {
+    if (activePreset === preset.key) {
+      // Toggle off: remove active state and reset content options to default (false)
+      setActivePreset(null);
+      setOptions(prev => ({
+        ...prev,
+        detailed_theory: false,
+        extra_viva: false,
+        code_explanation: false,
+        compact: false,
+      }));
+      return;
+    }
+
     setActivePreset(preset.key);
     setOptions(prev => {
       const next = { ...prev };

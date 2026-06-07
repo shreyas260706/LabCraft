@@ -1,5 +1,5 @@
 /**
- * Navbar — Premium top navigation bar with branding
+ * Navbar — IPUSpace platform navigation with constellation mark
  */
 
 import { Link } from 'react-router-dom';
@@ -8,35 +8,45 @@ function Navbar() {
   return (
     <nav className="navbar" id="navbar">
       <Link to="/" className="navbar-brand" style={{ textDecoration: 'none' }}>
-        {/* Inline SVG logo icon */}
+        {/* Constellation / Orbit mark — platform logo */}
         <div className="navbar-logo-container">
-          <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="30" height="30" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <linearGradient id="navIG" x1="8" y1="2" x2="56" y2="60" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#7C3AED"/>
-                <stop offset="100%" stopColor="#06B6D4"/>
-              </linearGradient>
-              <linearGradient id="navBG" x1="16" y1="28" x2="48" y2="52" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#8B5CF6"/>
-                <stop offset="100%" stopColor="#22D3EE"/>
+              <linearGradient id="navBrandG" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#00E5FF"/>
+                <stop offset="50%" stopColor="#7B61FF"/>
+                <stop offset="100%" stopColor="#E040FB"/>
               </linearGradient>
             </defs>
-            <path d="M26 4 L26 16 L38 16 L38 4" stroke="url(#navIG)" strokeWidth="2.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M26 16 L10 50 Q8.5 53 11 55 L53 55 Q55.5 53 54 50 L38 16" stroke="url(#navIG)" strokeWidth="2.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M28 30 L19 38 L28 46" stroke="url(#navBG)" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M36 30 L45 38 L36 46" stroke="url(#navBG)" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M35 28 L29 48" stroke="url(#navBG)" strokeWidth="2" fill="none" strokeLinecap="round"/>
+            {/* Outer orbit ring */}
+            <ellipse cx="32" cy="32" rx="28" ry="28" stroke="url(#navBrandG)" strokeWidth="1.5" fill="none" opacity="0.4"/>
+            {/* Inner orbit ring */}
+            <ellipse cx="32" cy="32" rx="18" ry="18" stroke="url(#navBrandG)" strokeWidth="1.2" fill="none" opacity="0.25"/>
+            {/* Core node */}
+            <circle cx="32" cy="32" r="5" fill="url(#navBrandG)" opacity="0.9"/>
+            <circle cx="32" cy="32" r="3" fill="#00E5FF"/>
+            {/* Satellite nodes on orbits */}
+            <circle cx="52" cy="18" r="3.5" fill="#00E5FF" opacity="0.9"/>
+            <circle cx="12" cy="42" r="3" fill="#7B61FF" opacity="0.8"/>
+            <circle cx="48" cy="52" r="2.5" fill="#E040FB" opacity="0.7"/>
+            {/* Connection lines from core to satellites */}
+            <line x1="35" y1="29" x2="49" y2="20" stroke="url(#navBrandG)" strokeWidth="0.8" opacity="0.3"/>
+            <line x1="29" y1="34" x2="14" y2="41" stroke="url(#navBrandG)" strokeWidth="0.8" opacity="0.25"/>
+            <line x1="35" y1="35" x2="46" y2="50" stroke="url(#navBrandG)" strokeWidth="0.8" opacity="0.2"/>
           </svg>
         </div>
-        <span className="navbar-title">
-          <span className="navbar-title-lab">Lab</span>
-          <span className="navbar-title-craft">Craft</span>
-        </span>
+        <div className="navbar-brand-text">
+          <span className="navbar-title">
+            <span className="navbar-title-ipu">IPU</span>
+            <span className="navbar-title-space">Space</span>
+          </span>
+          <span className="navbar-subtitle">Academic Operating System</span>
+        </div>
       </Link>
       <div className="navbar-right">
         <div className="navbar-status">
           <span className="navbar-status-dot"></span>
-          <span>AI Powered</span>
+          <span>Platform Active</span>
         </div>
         <a
           href="https://github.com/shreyas260706/LabCraft"

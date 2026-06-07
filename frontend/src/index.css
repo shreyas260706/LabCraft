@@ -1,45 +1,54 @@
 /* ═══════════════════════════════════════════════════════════
-   LabCraft — Premium Design System & Global Styles
+   IPUSpace — Platform Design System & Global Styles
    ═══════════════════════════════════════════════════════════ */
 
 /* ─── Design Tokens ─────────────────────────────────────── */
 :root {
-  /* Primary Palette — Electric Purple */
-  --primary: #7C3AED;
-  --primary-light: #8B5CF6;
-  --primary-lighter: #A78BFA;
-  --primary-dark: #6D28D9;
-  --primary-glow: rgba(124, 58, 237, 0.25);
+  /* Primary — Electric Cyan */
+  --primary: #00E5FF;
+  --primary-light: #33ECFF;
+  --primary-lighter: #80F2FF;
+  --primary-dark: #00B8D4;
+  --primary-glow: rgba(0, 229, 255, 0.25);
 
-  /* Accent — Neon Blue */
-  --accent: #06B6D4;
-  --accent-light: #22D3EE;
-  --accent-lighter: #67E8F9;
-  --accent-glow: rgba(6, 182, 212, 0.2);
+  /* Secondary — Cosmic Violet */
+  --secondary: #7B61FF;
+  --secondary-light: #9B87FF;
+  --secondary-dark: #5B3FE0;
+  --secondary-glow: rgba(123, 97, 255, 0.2);
 
-  /* Gradient */
-  --gradient-primary: linear-gradient(135deg, #7C3AED, #06B6D4);
-  --gradient-primary-hover: linear-gradient(135deg, #8B5CF6, #22D3EE);
-  --gradient-text: linear-gradient(135deg, #A78BFA, #67E8F9);
-  --gradient-subtle: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.08));
+  /* Accent — Aurora Magenta */
+  --accent: #E040FB;
+  --accent-light: #EA80FC;
+  --accent-lighter: #F3B0FF;
+  --accent-glow: rgba(224, 64, 251, 0.2);
 
-  /* Backgrounds — Deep Dark */
-  --bg-primary: #0B0F1A;
-  --bg-secondary: #0F1420;
-  --bg-surface: #131825;
-  --bg-surface-hover: #1A1F30;
-  --bg-surface-active: #1F253A;
-  --bg-elevated: #1A2035;
+  /* Brand Gradients */
+  --gradient-brand: linear-gradient(135deg, #00E5FF, #7B61FF);
+  --gradient-brand-hover: linear-gradient(135deg, #33ECFF, #9B87FF);
+  --gradient-primary: linear-gradient(135deg, #00E5FF, #7B61FF);
+  --gradient-primary-hover: linear-gradient(135deg, #33ECFF, #9B87FF);
+  --gradient-text: linear-gradient(135deg, #00E5FF, #7B61FF, #E040FB);
+  --gradient-subtle: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(123, 97, 255, 0.06));
+  --gradient-aurora: linear-gradient(135deg, #00E5FF 0%, #7B61FF 50%, #E040FB 100%);
+
+  /* Backgrounds — Deep Space Black */
+  --bg-primary: #050508;
+  --bg-secondary: #0A0A10;
+  --bg-surface: #0F0F18;
+  --bg-surface-hover: #16162A;
+  --bg-surface-active: #1C1C38;
+  --bg-elevated: #141428;
 
   /* Text — WCAG contrast optimized */
   --text-primary: #F1F5F9;
-  --text-secondary: #B0BEC5;
-  --text-tertiary: #78909C;
-  --text-inverse: #0B0F1A;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-inverse: #050508;
 
   /* Borders */
-  --border: rgba(148, 163, 184, 0.12);
-  --border-light: rgba(148, 163, 184, 0.2);
+  --border: rgba(148, 163, 184, 0.08);
+  --border-light: rgba(148, 163, 184, 0.15);
   --border-focus: var(--primary);
 
   /* Status */
@@ -48,11 +57,11 @@
   --error: #F87171;
 
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.025);
-  --glass-border: rgba(255, 255, 255, 0.07);
-  --glass-bg-hover: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-bg-hover: rgba(255, 255, 255, 0.04);
   --glass-border-hover: rgba(255, 255, 255, 0.1);
-  --glass-blur: 20px;
+  --glass-blur: 24px;
 
   /* Spacing — 8px scale */
   --space-xs: 4px;
@@ -72,11 +81,12 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.5);
-  --shadow-glow-purple: 0 0 30px rgba(124, 58, 237, 0.2);
-  --shadow-glow-blue: 0 0 30px rgba(6, 182, 212, 0.15);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.6);
+  --shadow-glow-cyan: 0 0 30px rgba(0, 229, 255, 0.15);
+  --shadow-glow-violet: 0 0 30px rgba(123, 97, 255, 0.15);
+  --shadow-glow-aurora: 0 0 30px rgba(224, 64, 251, 0.12);
 
   /* Typography */
   --font-display: 'Space Grotesk', system-ui, sans-serif;
@@ -120,8 +130,8 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 50% at 20% -5%, rgba(124, 58, 237, 0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 85% 95%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+    radial-gradient(ellipse 70% 50% at 20% -5%, rgba(0, 229, 255, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 95%, rgba(123, 97, 255, 0.04) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -186,7 +196,7 @@ a:hover { color: var(--accent); }
 
 @keyframes glow {
   0%, 100% { box-shadow: 0 0 20px var(--primary-glow); }
-  50% { box-shadow: 0 0 40px var(--primary-glow), 0 0 60px rgba(124, 58, 237, 0.12); }
+  50% { box-shadow: 0 0 40px var(--primary-glow), 0 0 60px rgba(0, 229, 255, 0.12); }
 }
 
 @keyframes gradientShift {
@@ -208,18 +218,18 @@ a:hover { color: var(--accent); }
 
 @keyframes gradientTextGlow {
   0%, 100% {
-    filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.25));
+    filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.2));
     background-position: 0% 50%;
   }
   50% {
-    filter: drop-shadow(0 0 16px rgba(124, 58, 237, 0.4));
+    filter: drop-shadow(0 0 16px rgba(123, 97, 255, 0.35));
     background-position: 100% 50%;
   }
 }
 
 @keyframes borderGlow {
-  0%, 100% { border-color: rgba(124, 58, 237, 0.3); }
-  50% { border-color: rgba(6, 182, 212, 0.3); }
+  0%, 100% { border-color: rgba(0, 229, 255, 0.2); }
+  50% { border-color: rgba(123, 97, 255, 0.2); }
 }
 
 .fade-in { animation: fadeIn var(--duration-normal) var(--ease-out); }

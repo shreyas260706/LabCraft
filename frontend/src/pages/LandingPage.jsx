@@ -24,8 +24,9 @@ const ECOSYSTEM_NODES = [
     label: 'LabCraft',
     status: 'Live',
     color: '#00E5FF',
-    orbitRadius: 0.32,
-    speed: 0.0004,
+    orbitRadius: 0.55,
+    speed: 0.002,
+    initialAngle: 0,
     description: 'Instantly transforms course inputs into structured PDF/DOCX lab reports with annotated source code, theories, and viva sheets.',
   },
   {
@@ -33,8 +34,9 @@ const ECOSYSTEM_NODES = [
     label: 'PYQSpace',
     status: 'Coming Soon',
     color: '#E040FB',
-    orbitRadius: 0.45,
-    speed: 0.00025,
+    orbitRadius: 0.85,
+    speed: 0.0012,
+    initialAngle: Math.PI * 0.8,
     description: 'Previous year papers reimagined. Solved answers, exam analytics, and priority chapter breakdowns optimized for late-night study.',
   },
 ];
@@ -196,9 +198,10 @@ function OrbitalCanvas({ setActiveNode }) {
 
     // Draw orbit rings
     ECOSYSTEM_NODES.forEach((node, i) => {
-      const r = node.orbitRadius * scale;
+      const rx = node.orbitRadius * (w / 2.5);
+      const ry = node.orbitRadius * (h / 2.5);
       ctx.beginPath();
-      ctx.ellipse(cx, cy, r, r * 0.55, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
       ctx.strokeStyle = i === 0
         ? 'rgba(0, 229, 255, 0.08)'
         : 'rgba(224, 64, 251, 0.06)';
@@ -211,9 +214,10 @@ function OrbitalCanvas({ setActiveNode }) {
     // Draw energy particles
     particlesRef.current.forEach((p) => {
       const node = ECOSYSTEM_NODES[p.orbit];
-      const r = node.orbitRadius * scale;
-      const px = cx + Math.cos(p.angle) * r;
-      const py = cy + Math.sin(p.angle) * r * 0.55;
+      const rx = node.orbitRadius * (w / 2.5);
+      const ry = node.orbitRadius * (h / 2.5);
+      const px = cx + Math.cos(p.angle) * rx;
+      const py = cy + Math.sin(p.angle) * ry;
       ctx.beginPath();
       ctx.arc(px, py, p.size, 0, Math.PI * 2);
       ctx.fillStyle = p.orbit === 0
@@ -225,11 +229,11 @@ function OrbitalCanvas({ setActiveNode }) {
 
     // Draw connection beams from core to product nodes
     ECOSYSTEM_NODES.forEach((node, i) => {
-      const r = node.orbitRadius * scale;
-      const baseAngle = angleRef.current * (node.speed / 0.0004);
-      const nodeAngle = baseAngle + (i === 0 ? 0 : Math.PI * 0.7);
-      const nx = cx + Math.cos(nodeAngle) * r;
-      const ny = cy + Math.sin(nodeAngle) * r * 0.55;
+      const rx = node.orbitRadius * (w / 2.5);
+      const ry = node.orbitRadius * (h / 2.5);
+      const nodeAngle = angleRef.current * node.speed + node.initialAngle;
+      const nx = cx + Math.cos(nodeAngle) * rx;
+      const ny = cy + Math.sin(nodeAngle) * ry;
 
       // Connection line
       const grad = ctx.createLinearGradient(cx, cy, nx, ny);
@@ -361,12 +365,12 @@ function OrbitalCanvas({ setActiveNode }) {
       const cy = h / 2;
       const scale = Math.min(w, h);
 
-      ECOSYSTEM_NODES.forEach((node, i) => {
-        const r = node.orbitRadius * scale;
-        const baseAngle = angleRef.current * (node.speed / 0.0004);
-        const nodeAngle = baseAngle + (i === 0 ? 0 : Math.PI * 0.7);
-        const nx = cx + Math.cos(nodeAngle) * r;
-        const ny = cy + Math.sin(nodeAngle) * r * 0.55;
+      ECOSYSTEM_NODES.forEach((node) => {
+        const rx = node.orbitRadius * (w / 2.5);
+        const ry = node.orbitRadius * (h / 2.5);
+        const nodeAngle = angleRef.current * node.speed + node.initialAngle;
+        const nx = cx + Math.cos(nodeAngle) * rx;
+        const ny = cy + Math.sin(nodeAngle) * ry;
         if (Math.hypot(mx - nx, my - ny) < 30) {
           setActiveNode(node.id);
         }
